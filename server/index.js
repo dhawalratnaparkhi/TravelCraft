@@ -45,7 +45,7 @@ Short reasons only.
 });
 
 // ✅ SPA FALLBACK (CRITICAL)
-app.get("*", (req, res) => {
+app.use((req, res) => {
   res.sendFile(path.join(__dirname, "../dist/index.html"));
 });
 
