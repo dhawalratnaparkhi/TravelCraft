@@ -86,3 +86,15 @@ const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log("AI server running on port", PORT);
 });
+app.post("/api/custom-trip", async (req, res) => {
+  try {
+    console.log("New inquiry:", req.body);
+
+    // TEMP: just confirm receipt
+    res.json({ success: true });
+
+  } catch (err) {
+    console.error("FORM ERROR:", err);
+    res.status(500).json({ error: "Form failed" });
+  }
+});
