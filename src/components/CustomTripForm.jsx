@@ -70,18 +70,7 @@ export default function CustomTripForm() {
       <div className="custom-form-container">
         <h2>Your Custom Journey</h2>
 
-        {success && (
-          <p className="form-success">
-            ✅ Inquiry received. Our travel expert will contact you shortly.
-          </p>
-        )}
-
-        {error && (
-          <p className="form-error">
-            ❌ {error}
-          </p>
-        )}
-
+      
         <form className="custom-form" onSubmit={handleSubmit}>
           <div className="form-grid">
   <input
@@ -222,6 +211,20 @@ export default function CustomTripForm() {
 
           <button type="submit" disabled={loading}>
             {loading ? "Submitting..." : "Get My Custom Itinerary"}
+            {success && (
+  <div className="form-success">
+    <strong>Inquiry submitted successfully</strong>
+    <span>
+      Our travel expert will contact you shortly with your custom itinerary.
+    </span>
+    {error && (
+  <div className="form-error">
+    {error}
+  </div>
+)}
+  </div>
+)}
+
           </button>
         </form>
       </div>
