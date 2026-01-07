@@ -24,27 +24,31 @@ app.post("/api/ai-trip", async (req, res) => {
     const { style, budget, days, from } = req.body;
 
     const prompt = `
-You are a professional travel consultant.
+You are an experienced travel consultant.
 
-Suggest exactly 3 realistic travel destinations based on:
-- Travel style: ${style}
-- Budget category: ${budget}
-- Trip duration: ${days} days
+User preferences:
+- Trip type: ${tripType}
 - Departure city: ${from}
+- Travel mode preference: ${travelMode}
+- Travel style: ${style}
+- Travel pace: ${pace}
+- Trip duration: ${days} days
+- Budget category: ${budget}
 
 Rules:
-- Destinations must be practical from the departure city
-- Match budget realistically (no luxury trips for low budget)
-- Avoid visa-difficult destinations if possible
-- Prefer popular, proven tourist destinations
+- Suggest only realistic destinations
+- If Domestic, suggest Indian destinations only
+- If International, suggest destinations with easy travel and visas
+- Match destination to travel mode and duration
+- Avoid impractical or extreme itineraries
 
-For each destination provide:
-Destination Name – 1 short practical reason including travel time or experience
+Return exactly 3 suggestions in this format:
+1. Destination – short practical reason (travel time, experience, or suitability)
 
-Example format:
-1. Bali – Affordable flights, great resorts, ideal for ${days}-day trip
-2. Switzerland – Scenic trains, premium experience, perfect for couples
-3. Dubai – Short flights, luxury hotels, easy visa process
+Example:
+1. Kerala – Short flights, relaxed pace, great for a 6–7 day trip
+2. Bali – Affordable resorts, good flight connectivity, ideal for couples
+3. Dubai – Easy visa, luxury hotels, perfect for a compact international trip
 
 `;
 

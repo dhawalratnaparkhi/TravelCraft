@@ -118,15 +118,46 @@ export default function AiPlanner() {
           Get destination ideas crafted around your preferences.
         </p>
 
-        <div className="ai-form">
-          <select><option>Travel Style</option><option>Luxury</option><option>Adventure</option><option>Relaxed</option></select>
-          <select><option>Budget Range</option><option>Budget</option><option>Mid-range</option><option>Premium</option></select>
-          <input type="number" placeholder="Number of days" />
-          <input type="text" placeholder="Departure city" />
-          <button className="ai-btn" onClick={generate}>
-            {loading ? "AI is thinking..." : "Generate with AI"}
-          </button>
-        </div>
+       <div className="ai-form">
+  <select name="tripType">
+    <option value="">Trip Type</option>
+    <option value="Domestic">Domestic (India)</option>
+    <option value="International">International</option>
+    <option value="Not Sure">Not sure</option>
+  </select>
+
+  <select name="travelMode">
+    <option value="">Preferred Travel Mode</option>
+    <option value="Flight">Flight</option>
+    <option value="Train">Train</option>
+    <option value="Road">Road Trip</option>
+    <option value="Doesn't matter">Doesn't matter</option>
+  </select>
+
+  <select name="style">
+    <option value="">Travel Style</option>
+    <option value="Luxury">Luxury</option>
+    <option value="Relaxed">Relaxed</option>
+    <option value="Adventure">Adventure</option>
+    <option value="Honeymoon">Honeymoon</option>
+    <option value="Family">Family</option>
+  </select>
+
+  <select name="pace">
+    <option value="">Travel Pace</option>
+    <option value="Slow & Relaxed">Slow & Relaxed</option>
+    <option value="Balanced">Balanced</option>
+    <option value="Fast">Fast & Packed</option>
+  </select>
+
+  <input type="number" placeholder="Number of days" />
+  <input type="text" placeholder="Departure city" />
+
+  <button className="ai-btn" onClick={generate}>
+    {loading ? "AI is thinking..." : "Generate with AI"}
+  </button>
+</div>
+
 
         {results.length > 0 && (
           <div className="ai-results">
