@@ -88,6 +88,20 @@ const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log("AI server running on port", PORT);
 });
+app.get("/api/firebase-test", async (req, res) => {
+  try {
+    const ref = await db.collection("healthcheck").add({
+      ok: true,
+      time: new Date().toISOString()
+    });
+
+    res.json({ success: true, id: ref.id });
+  } catch (err) {
+    console.error("🔥 FIREBASE TEST FAILED:", err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 app.post("/api/custom-trip", async (req, res) => {
   try {
     console.log("Incoming inquiry payload:", req.body);
