@@ -14,23 +14,23 @@ app.use(express.json());
 // ✅ SERVE FRONTEND BUILD
 app.use(express.static(path.join(__dirname, "../dist")));
 
-// ✅ OPENAI
+// ✅ OPENAI CLIENT
 const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
 });
 
+// ✅ AI ROUTE
 app.post("/api/ai-trip", async (req, res) => {
   try {
     const {
-  tripType = "Not Sure",
-  travelMode = "Doesn't matter",
-  style = "Balanced",
-  pace = "Balanced",
-  days = "5",
-  from = "India",
-  budget = "Mid-range"
-} = req.body || {};
-
+      tripType = "Not Sure",
+      travelMode = "Doesn't matter",
+      style = "Balanced",
+      pace = "Balanced",
+      days = "5",
+      from = "India",
+      budget = "Mid-range"
+    } = req.body || {};
 
     const prompt = `
 You are an experienced travel consultant.
@@ -52,13 +52,12 @@ Rules:
 - Avoid impractical or extreme itineraries
 
 Return exactly 3 suggestions in this format:
-1. Destination – short practical reason (travel time, experience, or suitability)
+1. Destination – short practical reason
 
 Example:
 1. Kerala – Short flights, relaxed pace, great for a 6–7 day trip
 2. Bali – Affordable resorts, good flight connectivity, ideal for couples
 3. Dubai – Easy visa, luxury hotels, perfect for a compact international trip
-
 `;
 
     const response = await client.chat.completions.create({
@@ -67,38 +66,22 @@ Example:
       temperature: 0.8
     });
 
-    res.json({ result: response.choices[0].message.content });
-  } catch (err) {
-    res.status(500).json({ error: "AI failed" });
+    res.json({
+      result: response.choices[0].message.content
+    });
+
+  } catch (error) {
+    console.error("AI ERROR:", error.message);
+    res.status(500).json({ error: "AI generation failed" });
   }
 });
 
-// ✅ SPA FALLBACK (CRITICAL)
-app.use((req, res) => {
+// ✅ SPA FALLBACK (FOR REACT ROUTER)
+app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "../dist/index.html"));
 });
 
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
-  console.log("Server running on port", PORT);
+  console.log("AI server running on port", PORT);
 });
-try {
-  const completion = await openai.chat.completions.create({
-    model: "gpt-4o-mini",
-    messages: [
-      { role: "system", content: SYSTEM_PROMPT },
-      { role: "user", content: USER_PROMPT }
-    ]
-  });
-
-  res.json({
-    result: completion.choices[0].message.content
-  });
-
-} catch (error) {
-  console.error("AI ERROR:", error.message);
-
-  res.status(500).json({
-    error: "AI generation failed"
-  });
-}
