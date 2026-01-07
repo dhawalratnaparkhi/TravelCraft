@@ -1,6 +1,7 @@
 import { useLocation } from "react-router-dom";
 import { useState } from "react";
 import "./custom-trip-form.css";
+import CustomSelect from "./CustomSelect";
 
 const initialState = {
   name: "",
@@ -36,16 +37,14 @@ export default function CustomTripForm() {
   const [error, setError] = useState("");
 
   function handleChange(e) {
-    setForm(prev => ({
-      ...prev,
-      [e.target.name]: e.target.value
-    }));
+    setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
   }
 
   async function handleSubmit(e) {
     e.preventDefault();
     setLoading(true);
     setError("");
+    setSuccess(false);
 
     try {
       const res = await fetch("/api/custom-trip", {
@@ -54,11 +53,11 @@ export default function CustomTripForm() {
         body: JSON.stringify(form)
       });
 
-      if (!res.ok) throw new Error("Request failed");
+      if (!res.ok) throw new Error("Failed");
 
       setSuccess(true);
       setForm(initialState);
-    } catch (err) {
+    } catch {
       setError("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
@@ -70,68 +69,37 @@ export default function CustomTripForm() {
       <div className="custom-form-container">
         <h2>Your Custom Journey</h2>
 
-      
         <form className="custom-form" onSubmit={handleSubmit}>
           <div className="form-grid">
-  <input
-    name="name"
-    required
-    placeholder="Full Name"
-    value={form.name}
-    onChange={handleChange}
-  />
+            <input name="name" placeholder="Full Name" value={form.name} onChange={handleChange} required />
+            <input name="phone" placeholder="Phone Number" value={form.phone} onChange={handleChange} required />
+            <input name="email" type="email" placeholder="Email Address" value={form.email} onChange={handleChange} required />
+            <input name="departureCity" placeholder="Departure City" value={form.departureCity} onChange={handleChange} required />
+          </div>
 
-  <input
-    name="phone"
-    required
-    placeholder="Phone Number"
-    value={form.phone}
-    onChange={handleChange}
-  />
+          <div className="form-grid">
+            <input name="destination" placeholder="Destination" value={form.destination} onChange={handleChange} required />
 
-  <input
-    name="email"
-    type="email"
-    required
-    placeholder="Email Address"
-    value={form.email}
-    onChange={handleChange}
-  />
+            <select name="tripType" value={form.tripType} onChange={handleChange} required>
+              <option value="">Trip Type</option>
+              <option value="Domestic">Domestic (India)</option>
+              <option value="International">International</option>
+            </select>
 
-  <input
-    name="departureCity"
-    required
-    placeholder="Departure City"
-    value={form.departureCity}
-    onChange={handleChange}
-  />
-</div>
-
-            <div className="form-grid">
-  <input
-    name="destination"
-    required
-    placeholder="Destination"
-    value={form.destination}
-    onChange={handleChange}
-  />
-
-  <select name="tripType" required value={form.tripType} onChange={handleChange}>
-    <option value="">Trip Type</option>
-    <option value="Domestic">Domestic (India)</option>
-    <option value="International">International</option>
-  </select>
-
-  <select name="tripPurpose" required value={form.tripPurpose} onChange={handleChange}>
-    <option value="">Trip Purpose</option>
-    <option value="Leisure">Leisure</option>
-    <option value="Honeymoon">Honeymoon</option>
-    <option value="Family">Family</option>
-    <option value="Adventure">Adventure</option>
-    <option value="Workation">Workation</option>
-  </select>
-
-
+            {/* 🔥 REAL CUSTOM DROPDOWN */}
+            <CustomSelect
+              placeholder="Trip Purpose"
+              value={form.tripPurpose}
+              onChange={value => setForm(prev => ({ ...prev, tripPurpose: value }))}
+              options={[
+                { value: "Leisure", label: "Leisure" },
+                { value: "Honeymoon", label: "Honeymoon" },
+                { value: "Family", label: "Family" },
+                { value: "Adventure", label: "Adventure" },
+                { value: "Spirituality", label: "Spirituality" },
+                { value: "Workation", label: "Workation" }
+              ]}
+            />
 
             <select name="travelMode" value={form.travelMode} onChange={handleChange}>
               <option value="">Preferred Travel Mode</option>
@@ -147,85 +115,30 @@ export default function CustomTripForm() {
               <option value="Fast">Fast-paced</option>
             </select>
 
-            <select name="hotel" value={form.hotel} onChange={handleChange}>
-              <option value="">Hotel Preference</option>
-              <option value="3 Star">3 Star</option>
-              <option value="4 Star">4 Star</option>
-              <option value="5 Star">5 Star</option>
-              <option value="Boutique">Boutique</option>
-            </select>
-
-            <select
-              name="budgetRange"
-              required
-              value={form.budgetRange}
-              onChange={handleChange}
-            >
-              <option value="">Budget Range (per person)</option>
-              <option value="Economy">Economy</option>
-              <option value="Mid-range">Mid-range</option>
-              <option value="Luxury">Luxury</option>
-              <option value="Ultra Luxury">Ultra Luxury</option>
-            </select>
-
-            <input
-              name="travelers"
-              type="number"
-              min="1"
-              required
-              placeholder="Number of Travelers"
-              value={form.travelers}
-              onChange={handleChange}
-            />
+            <input name="travelers" type="number" placeholder="Number of Travelers" value={form.travelers} onChange={handleChange} required />
 
             <div className="date-field">
-  <label>Departure Date</label>
-  <input
-    name="startDate"
-    type="date"
-    required
-    value={form.startDate}
-    onChange={handleChange}
-  />
-</div>
+              <label>Departure Date</label>
+              <input name="startDate" type="date" value={form.startDate} onChange={handleChange} required />
+            </div>
 
-
-            <input
-              name="durationDays"
-              type="number"
-              min="1"
-              required
-              placeholder="Trip Duration (Days)"
-              value={form.durationDays}
-              onChange={handleChange}
-            />
+            <input name="durationDays" type="number" placeholder="Trip Duration (Days)" value={form.durationDays} onChange={handleChange} required />
           </div>
 
-          <textarea
-            name="notes"
-            placeholder="Preferences, must-see places, budget notes, special requests"
-            rows="5"
-            value={form.notes}
-            onChange={handleChange}
-          />
+          <textarea name="notes" placeholder="Preferences, must-see places, special requests" value={form.notes} onChange={handleChange} />
 
           <button type="submit" disabled={loading}>
             {loading ? "Submitting..." : "Get My Custom Itinerary"}
-            {success && (
-  <div className="form-success">
-    <strong>Inquiry submitted successfully</strong>
-    <span>
-      Our travel expert will contact you shortly with your custom itinerary.
-    </span>
-    {error && (
-  <div className="form-error">
-    {error}
-  </div>
-)}
-  </div>
-)}
-
           </button>
+
+          {success && (
+            <div className="form-success">
+              <strong>Inquiry submitted successfully</strong>
+              <span>Our travel expert will contact you shortly.</span>
+            </div>
+          )}
+
+          {error && !success && <div className="form-error">{error}</div>}
         </form>
       </div>
     </section>
