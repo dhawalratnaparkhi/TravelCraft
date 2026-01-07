@@ -24,12 +24,28 @@ app.post("/api/ai-trip", async (req, res) => {
     const { style, budget, days, from } = req.body;
 
     const prompt = `
-Suggest 3 travel destinations.
-Style: ${style}
-Budget: ${budget}
-Days: ${days}
-From: ${from}
-Short reasons only.
+You are a professional travel consultant.
+
+Suggest exactly 3 realistic travel destinations based on:
+- Travel style: ${style}
+- Budget category: ${budget}
+- Trip duration: ${days} days
+- Departure city: ${from}
+
+Rules:
+- Destinations must be practical from the departure city
+- Match budget realistically (no luxury trips for low budget)
+- Avoid visa-difficult destinations if possible
+- Prefer popular, proven tourist destinations
+
+For each destination provide:
+Destination Name – 1 short practical reason including travel time or experience
+
+Example format:
+1. Bali – Affordable flights, great resorts, ideal for ${days}-day trip
+2. Switzerland – Scenic trains, premium experience, perfect for couples
+3. Dubai – Short flights, luxury hotels, easy visa process
+
 `;
 
     const response = await client.chat.completions.create({

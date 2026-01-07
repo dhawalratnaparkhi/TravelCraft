@@ -2,6 +2,18 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./ai-planner.css";
 
+const DESTINATION_IMAGES = {
+  Switzerland:
+    "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200",
+  Bali:
+    "https://images.unsplash.com/photo-1546484959-f9a7d7cfa4f5?auto=format&fit=crop&w=1200",
+  Iceland:
+    "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=1200",
+  Dubai:
+    "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=1200",
+  Paris:
+    "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=1200"
+};
 
 const MOCK_RESULTS = [
   {
@@ -71,13 +83,27 @@ export default function AiPlanner() {
 
   const data = await res.json();
 
-  const parsed = data.result.split("\n").map((line, i) => ({
-    id: i,
-    title: line.split("–")[0]?.replace(/^\d+\.\s*/, ""),
-    reason: line.split("–")[1] || "",
-    days: "Custom",
-    budget: "AI Suggested"
-  }));
+ const parsed = data.result
+  .split("\n")
+  .filter(Boolean)
+  .map((line, i) => {
+    const [place, reason] = line.split("–");
+
+    const destination =
+      place?.replace(/^\d+\.\s*/, "").trim() || "Destination";
+
+    return {
+      id: i,
+      title: destination,
+      reason: reason?.trim() || "",
+      days: "Custom",
+      budget: "AI Suggested",
+      img:
+        DESTINATION_IMAGES[destination] ||
+        "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=1200"
+    };
+  });
+
 
   setResults(parsed);
   setLoading(false);
