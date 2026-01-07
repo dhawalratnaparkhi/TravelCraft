@@ -90,20 +90,31 @@ app.listen(PORT, () => {
 });
 app.post("/api/custom-trip", async (req, res) => {
   try {
+    console.log("Incoming inquiry payload:", req.body);
+
+    if (!db) {
+      throw new Error("Firestore DB not initialized");
+    }
+
     const data = {
       ...req.body,
       createdAt: new Date().toISOString(),
       source: "custom-form"
     };
 
-    await db.collection("inquiries").add(data);
+    const ref = await db.collection("inquiries").add(data);
 
-    console.log("Saved inquiry:", data.destination);
+    console.log("Inquiry saved with ID:", ref.id);
+
     res.json({ success: true });
-
   } catch (err) {
-    console.error("FIREBASE ERROR:", err);
-    res.status(500).json({ error: "Failed to save inquiry" });
+    console.error("❌ FIRESTORE WRITE FAILED:", err);
+
+    res.status(500).json({
+      success: false,
+      error: err.message
+    });
   }
 });
+
 
