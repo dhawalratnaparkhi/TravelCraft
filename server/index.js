@@ -3,6 +3,8 @@ import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
 import OpenAI from "openai";
+import { db } from "./firebase.js";
+
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -88,13 +90,20 @@ app.listen(PORT, () => {
 });
 app.post("/api/custom-trip", async (req, res) => {
   try {
-    console.log("New inquiry:", req.body);
+    const data = {
+      ...req.body,
+      createdAt: new Date().toISOString(),
+      source: "custom-form"
+    };
 
-    // TEMP: just confirm receipt
+    await db.collection("inquiries").add(data);
+
+    console.log("Saved inquiry:", data.destination);
     res.json({ success: true });
 
   } catch (err) {
-    console.error("FORM ERROR:", err);
-    res.status(500).json({ error: "Form failed" });
+    console.error("FIREBASE ERROR:", err);
+    res.status(500).json({ error: "Failed to save inquiry" });
   }
 });
+
