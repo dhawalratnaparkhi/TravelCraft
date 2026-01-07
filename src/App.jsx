@@ -1,3 +1,4 @@
+import AiPlanner from "./components/AiPlanner";
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
 import ServiceCards from "./components/ServiceCards";
@@ -71,6 +72,8 @@ export default function App() {
 
         {/* CUSTOM TRIP */}
         <Route path="/custom" element={<CustomTripForm />} />
+        <Route path="/ai-planner" element={<AiPlanner />} />
+
       </Routes>
 
       {/* GLOBAL FOOTER */}

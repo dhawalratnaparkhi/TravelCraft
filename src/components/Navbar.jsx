@@ -29,10 +29,11 @@ export default function Navbar({ onNavigate }) {
   }, []);
 
   const links = [
-    { label: "Home", path: "/" },
-    { label: "Group Tours", path: "/group-tours" },
-    { label: "Plan Trip", path: "/custom" }
-  ];
+  { label: "Home", path: "/" },
+  { label: "Group Tours", path: "/group-tours" },
+  { label: "AI Planner", path: "/ai-planner" },
+  { label: "Plan Trip", path: "/custom" }
+];
 
   /* Set underline on route change */
   useEffect(() => {
