@@ -21,7 +21,16 @@ const client = new OpenAI({
 
 app.post("/api/ai-trip", async (req, res) => {
   try {
-    const { style, budget, days, from } = req.body;
+    const {
+  tripType = "Not Sure",
+  travelMode = "Doesn't matter",
+  style = "Balanced",
+  pace = "Balanced",
+  days = "5",
+  from = "India",
+  budget = "Mid-range"
+} = req.body || {};
+
 
     const prompt = `
 You are an experienced travel consultant.
@@ -73,3 +82,23 @@ const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log("Server running on port", PORT);
 });
+try {
+  const completion = await openai.chat.completions.create({
+    model: "gpt-4o-mini",
+    messages: [
+      { role: "system", content: SYSTEM_PROMPT },
+      { role: "user", content: USER_PROMPT }
+    ]
+  });
+
+  res.json({
+    result: completion.choices[0].message.content
+  });
+
+} catch (error) {
+  console.error("AI ERROR:", error.message);
+
+  res.status(500).json({
+    error: "AI generation failed"
+  });
+}
