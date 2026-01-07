@@ -1,0 +1,108 @@
+.services-section {
+  padding: 6rem 1.5rem;
+  margin-top: -5rem;
+  background: transparent;
+}
+
+.services-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  gap: 2.5rem;
+}
+
+.service-card {
+  position: relative;
+  height: 420px;
+  border-radius: 32px;
+  overflow: hidden;
+  cursor: pointer;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.18);
+  transition: transform 0.4s ease;
+}
+
+.service-card:hover {
+  transform: translateY(-8px);
+}
+
+.service-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.service-overlay {
+  position: absolute;
+  inset: 0;
+  padding: 2.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  color: white;
+}
+
+.service-overlay.blue {
+  background: linear-gradient(
+    to top,
+    rgba(15, 76, 129, 0.95),
+    rgba(15, 76, 129, 0.35),
+    transparent
+  );
+}
+
+.service-overlay.orange {
+  background: linear-gradient(
+    to top,
+    rgba(255, 140, 0, 0.95),
+    rgba(255, 140, 0, 0.35),
+    transparent
+  );
+}
+
+.service-icon {
+  width: 48px;
+  height: 48px;
+  margin-bottom: 1rem;
+  color: #ff8c00;
+}
+
+.service-icon.dark {
+  color: #0f4c81;
+}
+
+.service-overlay h3 {
+  font-size: 2.2rem;
+  font-weight: 900;
+  margin-bottom: 0.5rem;
+}
+
+.service-overlay p {
+  font-size: 1.05rem;
+  line-height: 1.6;
+  margin-bottom: 1.2rem;
+  max-width: 320px;
+}
+
+.service-overlay span {
+  display: inline-block;
+  align-self: flex-start;
+  font-size: 0.75rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  font-weight: 800;
+  padding: 0.5rem 1.2rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.95);
+  color: #000;
+}
+
+/* Desktop layout */
+@media (min-width: 900px) {
+  .services-container {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .service-card {
+    height: 460px;
+  }
+}

@@ -1,0 +1,87 @@
+.hero {
+  position: relative;
+  min-height: 95vh;
+  display: flex;
+  align-items: center;
+  color: white;
+  overflow: hidden;
+}
+
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+}
+
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to right,
+    rgba(0,0,0,0.75),
+    rgba(0,0,0,0.4),
+    rgba(0,0,0,0.1)
+  );
+}
+
+.hero-content {
+  position: relative;
+  max-width: 1200px;
+  padding: 0 24px;
+  margin: auto;
+}
+
+.hero h1 {
+  font-size: 2.8rem;
+  line-height: 1.1;
+  font-weight: 900;
+  margin-bottom: 20px;
+}
+
+.hero h1 span {
+  color: #ff8c00;
+}
+
+.hero p {
+  font-size: 1.1rem;
+  max-width: 520px;
+  opacity: 0.9;
+  margin-bottom: 32px;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.btn-primary {
+  background: #ff8c00;
+  color: white;
+  padding: 16px 28px;
+  border-radius: 16px;
+  font-size: 1.1rem;
+  font-weight: 800;
+}
+
+.btn-secondary {
+  background: rgba(255,255,255,0.15);
+  color: white;
+  padding: 16px 28px;
+  border-radius: 16px;
+  font-size: 1.1rem;
+  font-weight: 800;
+  backdrop-filter: blur(6px);
+}
+
+/* DESKTOP */
+@media (min-width: 1024px) {
+  .hero h1 {
+    font-size: 4.8rem;
+  }
+
+  .hero p {
+    font-size: 1.4rem;
+  }
+}
