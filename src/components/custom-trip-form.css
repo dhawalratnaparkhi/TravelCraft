@@ -74,3 +74,25 @@
     grid-template-columns: repeat(2, 1fr);
   }
 }
+.date-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.date-field label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #64748b;
+  margin-left: 0.5rem;
+}
+
+/* Ensure textarea and button span full width */
+.custom-form textarea,
+.custom-form button {
+  grid-column: 1 / -1;
+}
+.full-width {
+  grid-column: 1 / -1;
+}
+

@@ -89,18 +89,78 @@ app.get("/api/firebase-test", async (req, res) => {
 /* ---------------- CUSTOM TRIP FORM ---------------- */
 app.post("/api/custom-trip", async (req, res) => {
   try {
-    console.log("Incoming inquiry payload:", req.body);
+    const {
+      name,
+      phone,
+      email,
+      departureCity,
+      destination,
+      tripType,
+      tripPurpose,
+      travelMode,
+      pace,
+      hotel,
+      budgetRange,
+      travelers,
+      startDate,
+      durationDays,
+      notes
+    } = req.body || {};
 
-    const ref = await db.collection("inquiries").add({
-      ...req.body,
-      createdAt: new Date().toISOString()
+    // Basic required field validation
+    if (
+      !name ||
+      !phone ||
+      !email ||
+      !departureCity ||
+      !destination ||
+      !tripType ||
+      !tripPurpose ||
+      !budgetRange ||
+      !travelers ||
+      !startDate ||
+      !durationDays
+    ) {
+      return res.status(400).json({
+        success: false,
+        error: "Missing required fields"
+      });
+    }
+
+    const inquiryData = {
+      name,
+      phone,
+      email,
+      departureCity,
+      destination,
+      tripType,
+      tripPurpose,
+      travelMode: travelMode || null,
+      pace: pace || null,
+      hotel: hotel || null,
+      budgetRange,
+      travelers: Number(travelers),
+      startDate,
+      durationDays: Number(durationDays),
+      notes: notes || "",
+      source: "custom-trip-form",
+      createdAt: new Date()
+    };
+
+    const ref = await db.collection("inquiries").add(inquiryData);
+
+    console.log("✅ Inquiry saved:", ref.id);
+
+    res.status(201).json({
+      success: true,
+      id: ref.id
     });
-
-    console.log("Inquiry saved:", ref.id);
-    res.json({ success: true });
   } catch (err) {
     console.error("❌ FIRESTORE WRITE FAILED:", err);
-    res.status(500).json({ success: false, error: err.message });
+    res.status(500).json({
+      success: false,
+      error: "Failed to save inquiry"
+    });
   }
 });
 
