@@ -48,39 +48,10 @@ export default function CustomTripForm() {
 
   async function handleSubmit(e) {
   e.preventDefault();
-  setError("");
-  setSuccess(false);
-
-  // 🔴 REQUIRED FIELD CHECK (CustomSelect fields)
-  if (
-    !form.tripType ||
-    !form.tripPurpose ||
-    !form.travelMode ||
-    !form.pace
-  ) {
-    setError("Please complete all required fields before submitting.");
-    return;
-  }
-
-  setLoading(true);
-
-  try {
-    const res = await fetch("/api/custom-trip", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form)
-    });
-
-    if (!res.ok) throw new Error();
-
-    setSuccess(true);
-    setForm(initialState);
-  } catch {
-    setError("Something went wrong. Please try again.");
-  } finally {
-    setLoading(false);
-  }
+  console.log("SUBMIT CLICKED", form);
+  alert("Submit clicked – check console");
 }
+
 
 
   return (
