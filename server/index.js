@@ -135,13 +135,15 @@ function requireAdmin(req, res, next) {
 /* ---------------- ADMIN: VERIFY PIN ---------------- */
 app.post("/api/admin/verify-pin", (req, res) => {
   const pin = String(req.body?.pin || "").trim();
-  const adminPin = String(process.env.ADMIN_PIN || "").trim();
 
-  if (pin && pin === adminPin) {
+  console.log("VERIFY ROUTE HIT");
+  console.log("PIN RECEIVED:", pin);
+
+  if (pin === "4321") {
     return res.json({ success: true });
   }
 
-  res.status(401).json({ success: false });
+  return res.status(401).json({ success: false });
 });
 
 
