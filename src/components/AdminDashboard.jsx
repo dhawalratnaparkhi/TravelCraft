@@ -33,15 +33,13 @@ export default function AdminDashboard() {
       body: JSON.stringify({ pin })
     });
 
-    if (!res.ok) {
-      throw new Error("Invalid PIN");
-    }
+    if (!res.ok) throw new Error("Invalid PIN");
 
-    // ✅ PIN is correct — lock auth state FIRST
+    // ✅ unlock UI
     setAuthenticated(true);
 
-    // ⬇️ Load data separately (errors here should NOT affect auth)
-    loadData(pin);
+    // ✅ then load data
+    await loadData(pin);
   } catch (err) {
     setAuthenticated(false);
     setAuthError("Invalid PIN");
@@ -52,25 +50,38 @@ export default function AdminDashboard() {
 
 
 
+
   /* ---------- LOAD DATA ---------- */
  const loadData = async (adminPin) => {
   try {
-    const [inqRes, tourRes] = await Promise.all([
+    const [inqResRaw, tourResRaw] = await Promise.all([
       fetch("/api/admin/inquiries", {
         headers: { "x-admin-pin": adminPin }
-      }).then(r => r.json()),
-
+      }),
       fetch("/api/admin/group-tours", {
         headers: { "x-admin-pin": adminPin }
-      }).then(r => r.json())
+      })
     ]);
 
-    if (inqRes.success) setInquiries(inqRes.inquiries || []);
-    if (tourRes.success) setTours(tourRes.tours || []);
+    // 🚨 If auth failed, backend will return 401
+    if (inqResRaw.status === 401 || tourResRaw.status === 401) {
+      console.error("Admin API unauthorized");
+      return;
+    }
+
+    const inqRes = await inqResRaw.json();
+    const tourRes = await tourResRaw.json();
+
+    console.log("Admin inquiries:", inqRes);
+    console.log("Admin tours:", tourRes);
+
+    setInquiries(inqRes.inquiries || []);
+    setTours(tourRes.tours || []);
   } catch (err) {
-    console.error("Admin data load failed", err);
+    console.error("Failed to load admin data", err);
   }
 };
+
 
 
   /* ---------- ACTIONS ---------- */
