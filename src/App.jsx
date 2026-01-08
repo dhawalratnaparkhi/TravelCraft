@@ -11,25 +11,31 @@ import Footer from "./components/Footer";
 import FAQ from "./components/FAQ";
 
 import { Routes, Route, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "./styles/base.css";
 import AdminDashboard from "./components/AdminDashboard";
 
 
-/* DATA */
-const TOURS = [
-  { id: "1", cat: "Trending", name: "Serene Bali Escape", price: 899, days: "6D/5N" },
-  { id: "2", cat: "International", name: "Swiss Alpine Luxury", price: 2450, days: "7D/6N" },
-  { id: "3", cat: "Weekend", name: "Dubai Desert Mirage", price: 1150, days: "5D/4N" },
-  { id: "4", cat: "Domestic", name: "Kerala Backwaters", price: 450, days: "4D/3N" },
-  { id: "5", cat: "International", name: "Iceland Lights", price: 3200, days: "8D/7N" },
-];
-
 export default function App() {
   const navigate = useNavigate();
   const [activeCat, setActiveCat] = useState("Trending");
+const [tours, setTours] = useState([]);
 
-  const filteredTours = TOURS.filter((t) => t.cat === activeCat);
+useEffect(() => {
+  fetch("/api/group-tours")
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        setTours(data.tours);
+      }
+    })
+    .catch(err => {
+      console.error("Failed to load group tours", err);
+    });
+}, []);
+
+const filteredTours = tours.filter(t => t.cat === activeCat);
+
 
   return (
   <Routes>
