@@ -13,6 +13,8 @@ import FAQ from "./components/FAQ";
 import { Routes, Route, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import "./styles/base.css";
+import AdminDashboard from "./components/AdminDashboard";
+
 
 /* DATA */
 const TOURS = [
@@ -30,54 +32,57 @@ export default function App() {
   const filteredTours = TOURS.filter((t) => t.cat === activeCat);
 
   return (
-    <>
-      {/* GLOBAL NAV */}
-      <Navbar onNavigate={navigate} />
+  <Routes>
+    {/* ADMIN (NO NAV / FOOTER) */}
+    <Route path="/admin" element={<AdminDashboard />} />
 
-      <Routes>
-        {/* HOME */}
-        <Route
-          path="/"
-          element={
-            <>
-              <Hero
-                onCustom={() => navigate("/custom")}
-                onGroup={() => navigate("/group-tours")}
-              />
+    {/* PUBLIC SITE */}
+    <Route
+      path="/*"
+      element={
+        <>
+          <Navbar onNavigate={navigate} />
 
-              <ServiceCards
-                onCustom={() => navigate("/custom")}
-                onGroup={() => navigate("/group-tours")}
-              />
-
-              <HowItWorks />
-              <Testimonials />
-              <FAQ />
-              <HomeCTA onCustom={() => navigate("/custom")} />
-            </>
-          }
-        />
-
-        {/* GROUP TOURS */}
-        <Route
-          path="/group-tours"
-          element={
-            <GroupTours
-              activeCat={activeCat}
-              setActiveCat={setActiveCat}
-              tours={filteredTours}
+          <Routes>
+            <Route
+              path="/"
+              element={
+                <>
+                  <Hero
+                    onCustom={() => navigate("/custom")}
+                    onGroup={() => navigate("/group-tours")}
+                  />
+                  <ServiceCards
+                    onCustom={() => navigate("/custom")}
+                    onGroup={() => navigate("/group-tours")}
+                  />
+                  <HowItWorks />
+                  <Testimonials />
+                  <FAQ />
+                  <HomeCTA onCustom={() => navigate("/custom")} />
+                </>
+              }
             />
-          }
-        />
 
-        {/* CUSTOM TRIP */}
-        <Route path="/custom" element={<CustomTripForm />} />
-        <Route path="/ai-planner" element={<AiPlanner />} />
+            <Route
+              path="/group-tours"
+              element={
+                <GroupTours
+                  activeCat={activeCat}
+                  setActiveCat={setActiveCat}
+                  tours={filteredTours}
+                />
+              }
+            />
 
-      </Routes>
+            <Route path="/custom" element={<CustomTripForm />} />
+            <Route path="/ai-planner" element={<AiPlanner />} />
+          </Routes>
 
-      {/* GLOBAL FOOTER */}
-      <Footer onNavigate={navigate} />
-    </>
-  );
+          <Footer onNavigate={navigate} />
+        </>
+      }
+    />
+  </Routes>
+);
 }
