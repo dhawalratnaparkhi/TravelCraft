@@ -204,6 +204,48 @@ app.get("/api/group-tours", async (req, res) => {
   }
 });
 
+/* ---------------- ADMIN: CREATE GROUP TOUR ---------------- */
+app.post("/api/admin/group-tours", async (req, res) => {
+  try {
+    const {
+      name = "",
+      cat = "",
+      price = 0,
+      days = "",
+      img = "",
+      active = true
+    } = req.body || {};
+
+    if (!name || !cat || !price || !days || !img) {
+      return res.status(400).json({
+        success: false,
+        error: "Missing required fields"
+      });
+    }
+
+    const ref = await db.collection("groupTours").add({
+      name,
+      cat,
+      price: Number(price),
+      days,
+      img,
+      active: Boolean(active),
+      createdAt: new Date().toISOString()
+    });
+
+    res.json({
+      success: true,
+      id: ref.id
+    });
+  } catch (err) {
+    console.error("❌ CREATE TOUR FAILED:", err);
+    res.status(500).json({
+      success: false,
+      error: err.message
+    });
+  }
+});
+
 /* ---------------- SPA FALLBACK (ALWAYS LAST) ---------------- */
 app.use((req, res) => {
   res.sendFile(path.join(__dirname, "../dist/index.html"));
