@@ -46,7 +46,7 @@ export default function CustomTripForm() {
     setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
   }
 
- async function handleSubmit(e) {
+  async function handleSubmit(e) {
   e.preventDefault();
   setError("");
   setSuccess(false);
@@ -80,19 +80,6 @@ export default function CustomTripForm() {
     setError("Something went wrong. Please try again.");
   } finally {
     setLoading(false);
-  }
-}
-
-
-    console.log("HTTP STATUS:", res.status);
-
-    const data = await res.json();
-    console.log("API RESPONSE:", data);
-
-    alert("Request completed. Check console.");
-  } catch (err) {
-    console.error("FETCH ERROR:", err);
-    alert("Fetch failed. Check console.");
   }
 }
 
