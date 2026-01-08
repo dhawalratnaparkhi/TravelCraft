@@ -149,18 +149,30 @@ export default function AiPlanner() {
                   </div>
 
                   <button
-                    className="ai-use-btn"
-                    onClick={() =>
-                      navigate("/custom", {
-                        state: {
-                          destination: item.title,
-                          notes: `AI Suggested Plan:\n${item.reason}`
-                        }
-                      })
-                    }
-                  >
-                    Use this plan
-                  </button>
+  className="ai-use-btn"
+  onClick={() =>
+    navigate("/custom", {
+      state: {
+        // Core
+        destination: item.title,
+        notes: `AI Suggested Plan:\n${item.reason}`,
+
+        // AI form context
+        tripType: form.tripType,
+        travelMode: form.travelMode,
+        pace: form.pace,
+        durationDays: form.days,
+        departureCity: form.from,
+
+        // Best guess mappings
+        tripPurpose: form.style || "",
+      }
+    })
+  }
+>
+  Use this plan
+</button>
+
                 </div>
               </div>
             ))}

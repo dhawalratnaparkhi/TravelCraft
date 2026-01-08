@@ -23,11 +23,20 @@ export default function CustomTripForm() {
   const location = useLocation();
   const prefill = location.state || {};
 
-  const [form, setForm] = useState({
-    ...initialState,
-    destination: prefill.destination || "",
-    departureCity: prefill.departureCity || ""
-  });
+ const [form, setForm] = useState({
+  ...initialState,
+
+  // Auto-filled from AI Planner (if present)
+  destination: prefill.destination || "",
+  departureCity: prefill.departureCity || "",
+  tripType: prefill.tripType || "",
+  travelMode: prefill.travelMode || "",
+  pace: prefill.pace || "",
+  durationDays: prefill.durationDays || "",
+  tripPurpose: prefill.tripPurpose || "",
+  notes: prefill.notes || ""
+});
+
 
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
