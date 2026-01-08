@@ -2,10 +2,15 @@ import { useEffect, useState } from "react";
 import "./admin-dashboard.css";
 
 export default function AdminDashboard() {
+  /* ---------- AUTH ---------- */
+  const [pin, setPin] = useState("");
+  const [authenticated, setAuthenticated] = useState(false);
+
+  /* ---------- DATA ---------- */
   const [inquiries, setInquiries] = useState([]);
   const [tours, setTours] = useState([]);
   const [selected, setSelected] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   const [newTour, setNewTour] = useState({
@@ -16,29 +21,46 @@ export default function AdminDashboard() {
     img: ""
   });
 
+  /* ---------- LOAD DATA AFTER LOGIN ---------- */
   useEffect(() => {
-    loadData();
-  }, []);
+    if (authenticated) {
+      loadData();
+    }
+  }, [authenticated]);
 
   const loadData = () => {
     setLoading(true);
+    setError("");
+
     Promise.all([
-      fetch("/api/admin/inquiries").then(res => res.json()),
-      fetch("/api/admin/group-tours").then(res => res.json())
+      fetch("/api/admin/inquiries", {
+        headers: { "x-admin-pin": pin }
+      }).then(res => res.json()),
+
+      fetch("/api/admin/group-tours", {
+        headers: { "x-admin-pin": pin }
+      }).then(res => res.json())
     ])
       .then(([inqRes, tourRes]) => {
-        if (inqRes.success) setInquiries(inqRes.inquiries);
-        if (tourRes.success) setTours(tourRes.tours);
+        if (!inqRes.success || !tourRes.success) {
+          throw new Error("Unauthorized");
+        }
+        setInquiries(inqRes.inquiries);
+        setTours(tourRes.tours);
       })
       .catch(() => {
-        setError("Failed to load admin data");
+        setAuthenticated(false);
+        setPin("");
+        setError("Invalid PIN");
       })
       .finally(() => setLoading(false));
   };
 
+  /* ---------- ACTIONS ---------- */
   const toggleTour = async (id) => {
     await fetch(`/api/admin/group-tours/${id}/toggle`, {
-      method: "PATCH"
+      method: "PATCH",
+      headers: { "x-admin-pin": pin }
     });
 
     setTours(prev =>
@@ -53,32 +75,63 @@ export default function AdminDashboard() {
 
     const res = await fetch("/api/admin/group-tours", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "x-admin-pin": pin
+      },
       body: JSON.stringify(newTour)
     });
 
     const data = await res.json();
 
-    if (data.success) {
-      setNewTour({
-        name: "",
-        cat: "Trending",
-        price: "",
-        days: "",
-        img: ""
-      });
-      loadData();
-    } else {
+    if (!data.success) {
       alert("Failed to create tour");
+      return;
     }
+
+    setNewTour({
+      name: "",
+      cat: "Trending",
+      price: "",
+      days: "",
+      img: ""
+    });
+
+    loadData();
   };
 
+  /* ---------- LOGIN SCREEN ---------- */
+  if (!authenticated) {
+    return (
+      <div className="admin-page">
+        <h1 className="admin-title">Admin Login</h1>
+
+        <input
+          type="password"
+          placeholder="Enter Admin PIN"
+          value={pin}
+          onChange={e => setPin(e.target.value)}
+          className="admin-pin-input"
+        />
+
+        <button
+          className="admin-pin-btn"
+          onClick={() => setAuthenticated(true)}
+        >
+          Enter
+        </button>
+
+        {error && <p className="admin-error">{error}</p>}
+      </div>
+    );
+  }
+
+  /* ---------- DASHBOARD ---------- */
   return (
     <div className="admin-page">
       <h1 className="admin-title">Admin Dashboard</h1>
 
       {loading && <p>Loading...</p>}
-      {error && <p className="admin-error">{error}</p>}
 
       {/* CREATE TOUR */}
       <section className="admin-section">
@@ -216,7 +269,7 @@ export default function AdminDashboard() {
   );
 }
 
-/* helpers */
+/* ---------- HELPERS ---------- */
 
 function formatDate(value) {
   if (!value) return "-";
