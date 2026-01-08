@@ -15,6 +15,8 @@ app.use(express.json());
 /* ---------------- FRONTEND BUILD ---------------- */
 app.use(express.static(path.join(__dirname, "../dist")));
 
+const ADMIN_TOKEN = process.env.ADMIN_PIN;
+
 /* ---------------- OPENAI CLIENT ---------------- */
 const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
@@ -115,8 +117,22 @@ app.post("/api/custom-trip", async (req, res) => {
   }
 });
 
+function requireAdmin(req, res, next) {
+  const token = req.headers["x-admin-pin"];
+
+  if (!token || token !== ADMIN_TOKEN) {
+    return res.status(401).json({
+      success: false,
+      error: "Unauthorized"
+    });
+  }
+
+  next();
+}
+
 /* ---------------- ADMIN: GET ALL INQUIRIES ---------------- */
-app.get("/api/admin/inquiries", async (req, res) => {
+app.get("/api/admin/inquiries", requireAdmin, async (req, res) => {
+
   try {
     const snapshot = await db
       .collection("inquiries")
@@ -139,7 +155,8 @@ app.get("/api/admin/inquiries", async (req, res) => {
 });
 
 /* ---------------- ADMIN: GET GROUP TOURS ---------------- */
-app.get("/api/admin/group-tours", async (req, res) => {
+app.get("/api/admin/inquiries", requireAdmin, async (req, res) => {
+
   try {
     const snapshot = await db.collection("groupTours").get();
 
@@ -159,7 +176,8 @@ app.get("/api/admin/group-tours", async (req, res) => {
 });
 
 /* ---------------- ADMIN: TOGGLE GROUP TOUR ---------------- */
-app.patch("/api/admin/group-tours/:id/toggle", async (req, res) => {
+app.get("/api/admin/inquiries", requireAdmin, async (req, res) => {
+
   try {
     const { id } = req.params;
 
@@ -205,7 +223,8 @@ app.get("/api/group-tours", async (req, res) => {
 });
 
 /* ---------------- ADMIN: CREATE GROUP TOUR ---------------- */
-app.post("/api/admin/group-tours", async (req, res) => {
+app.get("/api/admin/inquiries", requireAdmin, async (req, res) => {
+
   try {
     const {
       name = "",
