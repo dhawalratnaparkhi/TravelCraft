@@ -22,7 +22,7 @@ export default function AdminDashboard() {
   });
 
   /* ---------- VERIFY PIN ---------- */
-  const verifyPin = async () => {
+ const verifyPin = async () => {
   setAuthError("");
   setLoading(true);
 
@@ -37,15 +37,19 @@ export default function AdminDashboard() {
       throw new Error("Invalid PIN");
     }
 
-    await loadData(pin);
+    // ✅ PIN is correct — lock auth state FIRST
     setAuthenticated(true);
+
+    // ⬇️ Load data separately (errors here should NOT affect auth)
+    loadData(pin);
   } catch (err) {
-    setAuthError("Invalid PIN");
     setAuthenticated(false);
+    setAuthError("Invalid PIN");
   } finally {
     setLoading(false);
   }
 };
+
 
 
   /* ---------- LOAD DATA ---------- */
@@ -61,14 +65,10 @@ export default function AdminDashboard() {
       }).then(r => r.json())
     ]);
 
-    if (!inqRes.success || !tourRes.success) {
-      throw new Error("Unauthorized");
-    }
-
-    setInquiries(inqRes.inquiries || []);
-    setTours(tourRes.tours || []);
+    if (inqRes.success) setInquiries(inqRes.inquiries || []);
+    if (tourRes.success) setTours(tourRes.tours || []);
   } catch (err) {
-    throw err;
+    console.error("Admin data load failed", err);
   }
 };
 
