@@ -1,7 +1,7 @@
 import { useLocation } from "react-router-dom";
 import { useState } from "react";
-import "./custom-trip-form.css";
-import CustomSelect from "./CustomSelect";
+import "/src/components/custom-trip-form.css";
+
 
 const initialState = {
   name: "",
@@ -13,8 +13,6 @@ const initialState = {
   tripPurpose: "",
   travelMode: "",
   pace: "",
-  hotel: "",
-  budgetRange: "",
   travelers: "",
   startDate: "",
   durationDays: "",
@@ -28,8 +26,7 @@ export default function CustomTripForm() {
   const [form, setForm] = useState({
     ...initialState,
     destination: prefill.destination || "",
-    departureCity: prefill.departureCity || "",
-    notes: prefill.notes || ""
+    departureCity: prefill.departureCity || ""
   });
 
   const [loading, setLoading] = useState(false);
@@ -53,7 +50,7 @@ export default function CustomTripForm() {
         body: JSON.stringify(form)
       });
 
-      if (!res.ok) throw new Error("Failed");
+      if (!res.ok) throw new Error();
 
       setSuccess(true);
       setForm(initialState);
@@ -75,9 +72,7 @@ export default function CustomTripForm() {
             <input name="phone" placeholder="Phone Number" value={form.phone} onChange={handleChange} required />
             <input name="email" type="email" placeholder="Email Address" value={form.email} onChange={handleChange} required />
             <input name="departureCity" placeholder="Departure City" value={form.departureCity} onChange={handleChange} required />
-          </div>
 
-          <div className="form-grid">
             <input name="destination" placeholder="Destination" value={form.destination} onChange={handleChange} required />
 
             <select name="tripType" value={form.tripType} onChange={handleChange} required>
@@ -86,20 +81,15 @@ export default function CustomTripForm() {
               <option value="International">International</option>
             </select>
 
-            {/* 🔥 REAL CUSTOM DROPDOWN */}
-            <CustomSelect
-              placeholder="Trip Purpose"
-              value={form.tripPurpose}
-              onChange={value => setForm(prev => ({ ...prev, tripPurpose: value }))}
-              options={[
-                { value: "Leisure", label: "Leisure" },
-                { value: "Honeymoon", label: "Honeymoon" },
-                { value: "Family", label: "Family" },
-                { value: "Adventure", label: "Adventure" },
-                { value: "Spirituality", label: "Spirituality" },
-                { value: "Workation", label: "Workation" }
-              ]}
-            />
+            <select name="tripPurpose" value={form.tripPurpose} onChange={handleChange} required>
+              <option value="">Trip Purpose</option>
+              <option value="Leisure">Leisure</option>
+              <option value="Honeymoon">Honeymoon</option>
+              <option value="Family">Family</option>
+              <option value="Adventure">Adventure</option>
+              <option value="Spirituality">Spirituality</option>
+              <option value="Workation">Workation</option>
+            </select>
 
             <select name="travelMode" value={form.travelMode} onChange={handleChange}>
               <option value="">Preferred Travel Mode</option>
@@ -116,29 +106,23 @@ export default function CustomTripForm() {
             </select>
 
             <input name="travelers" type="number" placeholder="Number of Travelers" value={form.travelers} onChange={handleChange} required />
-
-            <div className="date-field">
-              <label>Departure Date</label>
-              <input name="startDate" type="date" value={form.startDate} onChange={handleChange} required />
-            </div>
-
+            <input name="startDate" type="date" value={form.startDate} onChange={handleChange} required />
             <input name="durationDays" type="number" placeholder="Trip Duration (Days)" value={form.durationDays} onChange={handleChange} required />
           </div>
 
-          <textarea name="notes" placeholder="Preferences, must-see places, special requests" value={form.notes} onChange={handleChange} />
+          <textarea
+            name="notes"
+            placeholder="Preferences, must-see places, special requests"
+            value={form.notes}
+            onChange={handleChange}
+          />
 
           <button type="submit" disabled={loading}>
             {loading ? "Submitting..." : "Get My Custom Itinerary"}
           </button>
 
-          {success && (
-            <div className="form-success">
-              <strong>Inquiry submitted successfully</strong>
-              <span>Our travel expert will contact you shortly.</span>
-            </div>
-          )}
-
-          {error && !success && <div className="form-error">{error}</div>}
+          {success && <div className="form-success">Inquiry submitted successfully</div>}
+          {error && <div className="form-error">{error}</div>}
         </form>
       </div>
     </section>

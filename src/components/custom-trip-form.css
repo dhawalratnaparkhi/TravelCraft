@@ -1,147 +1,183 @@
+/* =================================================
+   CUSTOM TRIP FORM – FINAL POLISHED VERSION
+   Works with global.css + base.css
+   ================================================= */
+
+/* Section */
 .custom-form-section {
-  padding: 8rem 1.5rem;
+  padding: 6rem 1.5rem;
   background: #f8fafc;
 }
 
+/* Container */
 .custom-form-container {
   max-width: 900px;
-  margin: auto;
-  background: white;
-  border-radius: 4rem;
-  padding: 5rem 3rem;
-  box-shadow: 0 40px 100px rgba(0,0,0,0.12);
-  animation: fadeUp 0.6s ease forwards;
+  margin: 0 auto;
+  background: #ffffff;
+  border-radius: 32px;
+  padding: 4rem 3rem;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.12);
+
+  /* subtle entrance animation */
+  animation: fadeUp 0.6s ease both;
 }
 
+/* Heading */
 .custom-form-container h2 {
   text-align: center;
-  font-size: 3rem;
-  font-weight: 900;
+  font-size: 2.5rem;
+  font-weight: 800;
   color: #0f4c81;
   margin-bottom: 3rem;
 }
 
+/* Form */
 .custom-form {
   display: flex;
   flex-direction: column;
   gap: 2rem;
 }
 
+/* Grid */
 .form-grid {
   display: grid;
-  gap: 1.5rem;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.4rem;
 }
 
-@media (min-width: 768px) {
+@media (max-width: 768px) {
   .form-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr;
   }
 }
 
-/* 🔥 INPUTS + SELECTS ONLY (NOT custom-select) */
+/* =================================================
+   INPUTS + TEXTAREA (STABLE BASE)
+   ================================================= */
+
 .form-grid input,
 .form-grid select,
 .custom-form textarea {
   height: 56px;
-  padding: 0 1.5rem;
-  border-radius: 1.5rem;
-  background: #f1f5f9;
+  padding: 0 1.4rem;
+  border-radius: 999px;
   border: none;
-  font-weight: 700;
+
+  background: #f1f5f9;
+  font-family: inherit;
   font-size: 0.95rem;
+  font-weight: 600;
   color: #0f172a;
+
   outline: none;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.custom-form textarea {
-  height: auto;
-  padding: 1.3rem 1.5rem;
-  resize: none;
-  border-radius: 2rem;
-}
-
+/* Focus for inputs + textarea */
 .form-grid input:focus,
-.form-grid select:focus,
 .custom-form textarea:focus {
-  background: white;
+  background: #ffffff;
   box-shadow: 0 0 0 2px #0f4c81;
 }
 
-/* 🔥 ANIMATION – applies to EVERYTHING in grid */
-.form-grid > * {
-  animation: fieldFade 0.4s ease forwards;
+/* Textarea */
+.custom-form textarea {
+  height: auto;
+  padding: 1.3rem 1.4rem;
+  border-radius: 24px;
+  resize: none;
 }
 
-@keyframes fieldFade {
+/* =================================================
+   NATIVE SELECT – POLISHED & RESET-SAFE
+   ================================================= */
+
+.form-grid select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  padding-right: 3rem; /* space for arrow */
+
+  background-color: #f1f5f9;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%2364748b' viewBox='0 0 20 20'%3E%3Cpath d='M5.5 7l4.5 4.5L14.5 7'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1.3rem center;
+  background-size: 1rem;
+
+  cursor: pointer;
+}
+
+/* Hover */
+.form-grid select:hover {
+  background-color: #e9eef5;
+}
+
+/* Focus (controlled, no permanent outline) */
+.form-grid select:focus {
+  background: #ffffff;
+  box-shadow: 0 0 0 2px #0f4c81;
+}
+
+/* Dropdown options */
+.form-grid option {
+  font-weight: 500;
+  color: #0f172a;
+}
+
+/* =================================================
+   BUTTON
+   ================================================= */
+
+.custom-form button {
+  height: 60px;
+  border-radius: 999px;
+  background: #ff8c00;
+  color: white;
+  border: none;
+
+  font-size: 1.1rem;
+  font-weight: 800;
+  cursor: pointer;
+
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.custom-form button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 40px rgba(255, 140, 0, 0.35);
+}
+
+/* =================================================
+   MESSAGES
+   ================================================= */
+
+.form-success,
+.form-error {
+  margin-top: 1.5rem;
+  text-align: center;
+  font-weight: 600;
+}
+
+.form-success {
+  color: #065f46;
+}
+
+.form-error {
+  color: #991b1b;
+}
+
+/* =================================================
+   SAFE ANIMATION
+   ================================================= */
+
+@keyframes fadeUp {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(16px);
   }
   to {
     opacity: 1;
     transform: translateY(0);
   }
 }
-
-.date-field {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-}
-
-.date-field label {
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: #64748b;
-  margin-left: 0.5rem;
-}
-
-.custom-form button {
-  background: #ff8c00;
-  color: white;
-  border: none;
-  padding: 1.5rem;
-  border-radius: 2rem;
-  font-size: 1.2rem;
-  font-weight: 900;
-  cursor: pointer;
-  box-shadow: 0 20px 40px rgba(255,140,0,0.3);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.custom-form button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 25px 50px rgba(255,140,0,0.4);
-}
-
-.form-success,
-.form-error {
-  margin-top: 1.5rem;
-  border-radius: 1.5rem;
-  padding: 1.3rem;
-  text-align: center;
-  animation: fadeInScale 0.3s ease forwards;
-}
-
-.form-success {
-  background: #ecfdf5;
-  color: #065f46;
-  font-weight: 800;
-}
-
-.form-error {
-  background: #fef2f2;
-  color: #991b1b;
-  font-weight: 700;
-}
-
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes fadeInScale {
-  from { opacity: 0; transform: scale(0.96); }
-  to { opacity: 1; transform: scale(1); }
-}
-
