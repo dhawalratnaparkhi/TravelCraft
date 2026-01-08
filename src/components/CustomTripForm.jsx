@@ -46,16 +46,43 @@ export default function CustomTripForm() {
     setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
   }
 
-  async function handleSubmit(e) {
+ async function handleSubmit(e) {
   e.preventDefault();
-  console.log("Sending payload:", form);
+  setError("");
+  setSuccess(false);
+
+  // 🔒 Sanitize payload (Firestore-safe)
+  const payload = Object.fromEntries(
+    Object.entries(form).map(([key, value]) => [
+      key,
+      value === undefined ? "" : value
+    ])
+  );
+
+  setLoading(true);
 
   try {
     const res = await fetch("/api/custom-trip", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form)
+      body: JSON.stringify(payload)
     });
+
+    if (!res.ok) {
+      const err = await res.text();
+      throw new Error(err);
+    }
+
+    setSuccess(true);
+    setForm(initialState);
+  } catch (err) {
+    console.error("Submit error:", err);
+    setError("Something went wrong. Please try again.");
+  } finally {
+    setLoading(false);
+  }
+}
+
 
     console.log("HTTP STATUS:", res.status);
 
