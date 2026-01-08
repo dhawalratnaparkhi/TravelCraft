@@ -138,6 +138,26 @@ app.get("/api/admin/inquiries", async (req, res) => {
   }
 });
 
+/* ---------------- GROUP TOURS (PUBLIC) ---------------- */
+app.get("/api/group-tours", async (req, res) => {
+  try {
+    const snapshot = await db.collection("groupTours").get();
+
+    const tours = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+
+    res.json({ success: true, tours });
+  } catch (err) {
+    console.error("❌ GROUP TOURS FETCH FAILED:", err);
+    res.status(500).json({
+      success: false,
+      error: err.message
+    });
+  }
+});
+
 /* ---------------- SPA FALLBACK (ALWAYS LAST) ---------------- */
 app.use((req, res) => {
   res.sendFile(path.join(__dirname, "../dist/index.html"));
