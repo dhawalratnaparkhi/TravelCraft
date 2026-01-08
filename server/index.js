@@ -138,6 +138,52 @@ app.get("/api/admin/inquiries", async (req, res) => {
   }
 });
 
+/* ---------------- ADMIN: GET GROUP TOURS ---------------- */
+app.get("/api/admin/group-tours", async (req, res) => {
+  try {
+    const snapshot = await db.collection("groupTours").get();
+
+    const tours = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+
+    res.json({ success: true, tours });
+  } catch (err) {
+    console.error("❌ ADMIN GROUP TOURS FETCH FAILED:", err);
+    res.status(500).json({
+      success: false,
+      error: err.message
+    });
+  }
+});
+
+/* ---------------- ADMIN: TOGGLE GROUP TOUR ---------------- */
+app.patch("/api/admin/group-tours/:id/toggle", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const ref = db.collection("groupTours").doc(id);
+    const doc = await ref.get();
+
+    if (!doc.exists) {
+      return res.status(404).json({ success: false, error: "Tour not found" });
+    }
+
+    const current = doc.data().active === true;
+
+    await ref.update({ active: !current });
+
+    res.json({ success: true, active: !current });
+  } catch (err) {
+    console.error("❌ TOGGLE FAILED:", err);
+    res.status(500).json({
+      success: false,
+      error: err.message
+    });
+  }
+});
+
 /* ---------------- GROUP TOURS (PUBLIC) ---------------- */
 app.get("/api/group-tours", async (req, res) => {
   try {
