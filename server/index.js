@@ -130,6 +130,17 @@ function requireAdmin(req, res, next) {
   next();
 }
 
+/* ---------------- ADMIN: VERIFY PIN ---------------- */
+app.post("/api/admin/verify-pin", (req, res) => {
+  const { pin } = req.body || {};
+
+  if (pin && pin === process.env.ADMIN_PIN) {
+    return res.json({ success: true });
+  }
+
+  res.status(401).json({ success: false });
+});
+
 /* ---------------- ADMIN: GET ALL INQUIRIES ---------------- */
 app.get("/api/admin/inquiries", requireAdmin, async (req, res) => {
 

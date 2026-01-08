@@ -5,13 +5,13 @@ export default function AdminDashboard() {
   /* ---------- AUTH ---------- */
   const [pin, setPin] = useState("");
   const [authenticated, setAuthenticated] = useState(false);
+  const [authError, setAuthError] = useState("");
 
   /* ---------- DATA ---------- */
   const [inquiries, setInquiries] = useState([]);
   const [tours, setTours] = useState([]);
   const [selected, setSelected] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
 
   const [newTour, setNewTour] = useState({
     name: "",
@@ -21,39 +21,44 @@ export default function AdminDashboard() {
     img: ""
   });
 
-  /* ---------- LOAD DATA AFTER LOGIN ---------- */
-  useEffect(() => {
-    if (authenticated) {
-      loadData();
+  /* ---------- VERIFY PIN ---------- */
+  const verifyPin = async () => {
+    setAuthError("");
+
+    const res = await fetch("/api/admin/verify-pin", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ pin })
+    });
+
+    if (res.ok) {
+      setAuthenticated(true);
+      loadData(pin);
+    } else {
+      setAuthError("Invalid PIN");
     }
-  }, [authenticated]);
+  };
 
-  const loadData = () => {
+  /* ---------- LOAD ADMIN DATA ---------- */
+  const loadData = async (adminPin) => {
     setLoading(true);
-    setError("");
 
-    Promise.all([
-      fetch("/api/admin/inquiries", {
-        headers: { "x-admin-pin": pin }
-      }).then(res => res.json()),
+    try {
+      const [inqRes, tourRes] = await Promise.all([
+        fetch("/api/admin/inquiries", {
+          headers: { "x-admin-pin": adminPin }
+        }).then(r => r.json()),
 
-      fetch("/api/admin/group-tours", {
-        headers: { "x-admin-pin": pin }
-      }).then(res => res.json())
-    ])
-      .then(([inqRes, tourRes]) => {
-        if (!inqRes.success || !tourRes.success) {
-          throw new Error("Unauthorized");
-        }
-        setInquiries(inqRes.inquiries);
-        setTours(tourRes.tours);
-      })
-      .catch(() => {
-        setAuthenticated(false);
-        setPin("");
-        setError("Invalid PIN");
-      })
-      .finally(() => setLoading(false));
+        fetch("/api/admin/group-tours", {
+          headers: { "x-admin-pin": adminPin }
+        }).then(r => r.json())
+      ]);
+
+      setInquiries(inqRes.inquiries || []);
+      setTours(tourRes.tours || []);
+    } finally {
+      setLoading(false);
+    }
   };
 
   /* ---------- ACTIONS ---------- */
@@ -64,16 +69,14 @@ export default function AdminDashboard() {
     });
 
     setTours(prev =>
-      prev.map(t =>
-        t.id === id ? { ...t, active: !t.active } : t
-      )
+      prev.map(t => (t.id === id ? { ...t, active: !t.active } : t))
     );
   };
 
   const createTour = async (e) => {
     e.preventDefault();
 
-    const res = await fetch("/api/admin/group-tours", {
+    await fetch("/api/admin/group-tours", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -81,13 +84,6 @@ export default function AdminDashboard() {
       },
       body: JSON.stringify(newTour)
     });
-
-    const data = await res.json();
-
-    if (!data.success) {
-      alert("Failed to create tour");
-      return;
-    }
 
     setNewTour({
       name: "",
@@ -97,10 +93,10 @@ export default function AdminDashboard() {
       img: ""
     });
 
-    loadData();
+    loadData(pin);
   };
 
-  /* ---------- LOGIN SCREEN ---------- */
+  /* ---------- LOGIN ---------- */
   if (!authenticated) {
     return (
       <div className="admin-page">
@@ -114,14 +110,11 @@ export default function AdminDashboard() {
           className="admin-pin-input"
         />
 
-        <button
-          className="admin-pin-btn"
-          onClick={() => setAuthenticated(true)}
-        >
+        <button className="admin-pin-btn" onClick={verifyPin}>
           Enter
         </button>
 
-        {error && <p className="admin-error">{error}</p>}
+        {authError && <p className="admin-error">{authError}</p>}
       </div>
     );
   }
@@ -180,108 +173,6 @@ export default function AdminDashboard() {
           <button type="submit">Create Tour</button>
         </form>
       </section>
-
-      {/* GROUP TOURS */}
-      <section className="admin-section">
-        <h2>Group Tours</h2>
-
-        <div className="admin-table">
-          <div className="admin-row header">
-            <div>Name</div>
-            <div>Category</div>
-            <div>Price</div>
-            <div>Status</div>
-            <div>Action</div>
-          </div>
-
-          {tours.map(tour => (
-            <div key={tour.id} className="admin-row">
-              <div className="admin-cell">{tour.name}</div>
-              <div className="admin-cell">{tour.cat}</div>
-              <div className="admin-cell">₹{tour.price}</div>
-              <div className="admin-cell">
-                {tour.active ? "Active" : "Inactive"}
-              </div>
-              <div className="admin-cell">
-                <button
-                  onClick={() => toggleTour(tour.id)}
-                  className={tour.active ? "btn-off" : "btn-on"}
-                >
-                  {tour.active ? "Disable" : "Enable"}
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* INQUIRIES */}
-      <section className="admin-section">
-        <h2>Inquiries</h2>
-
-        <div className="admin-table">
-          <div className="admin-row header">
-            <div>Name</div>
-            <div>Email</div>
-            <div>Phone</div>
-            <div>Destination</div>
-            <div>Start Date</div>
-          </div>
-
-          {inquiries.map(item => (
-            <div
-              key={item.id}
-              className="admin-row"
-              onClick={() => setSelected(item)}
-              style={{ cursor: "pointer" }}
-            >
-              <div className="admin-cell">{item.name || "-"}</div>
-              <div className="admin-cell">{item.email || "-"}</div>
-              <div className="admin-cell">{item.phone || "-"}</div>
-              <div className="admin-cell">{item.destination || "-"}</div>
-              <div className="admin-cell">
-                {formatDate(item.startDate || item.createdAt)}
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {selected && (
-        <div className="admin-detail">
-          <h2>Inquiry Details</h2>
-
-          <div className="detail-grid">
-            {Object.entries(selected).map(([key, value]) => (
-              <div key={key} className="detail-row">
-                <strong>{key}</strong>
-                <span>{formatValue(value)}</span>
-              </div>
-            ))}
-          </div>
-
-          <button className="detail-close" onClick={() => setSelected(null)}>
-            Close
-          </button>
-        </div>
-      )}
     </div>
   );
-}
-
-/* ---------- HELPERS ---------- */
-
-function formatDate(value) {
-  if (!value) return "-";
-  if (typeof value === "string") return value.slice(0, 10);
-  if (value._seconds) {
-    return new Date(value._seconds * 1000).toISOString().slice(0, 10);
-  }
-  return "-";
-}
-
-function formatValue(value) {
-  if (value === null || value === undefined) return "-";
-  if (typeof value === "object") return JSON.stringify(value, null, 2);
-  return String(value);
 }
