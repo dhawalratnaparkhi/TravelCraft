@@ -115,6 +115,28 @@ app.post("/api/custom-trip", async (req, res) => {
   }
 });
 
+/* ---------------- ADMIN: GET ALL INQUIRIES ---------------- */
+app.get("/api/admin/inquiries", async (req, res) => {
+  try {
+    const snapshot = await db
+      .collection("inquiries")
+      .orderBy("createdAt", "desc")
+      .get();
+
+    const inquiries = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+
+    res.json({ success: true, inquiries });
+  } catch (err) {
+    console.error("❌ ADMIN FETCH FAILED:", err);
+    res.status(500).json({
+      success: false,
+      error: err.message
+    });
+  }
+});
 
 /* ---------------- SPA FALLBACK (ALWAYS LAST) ---------------- */
 app.use((req, res) => {
