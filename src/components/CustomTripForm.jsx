@@ -47,28 +47,41 @@ export default function CustomTripForm() {
   }
 
   async function handleSubmit(e) {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
-    setSuccess(false);
+  e.preventDefault();
+  setError("");
+  setSuccess(false);
 
-    try {
-      const res = await fetch("/api/custom-trip", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form)
-      });
-
-      if (!res.ok) throw new Error();
-
-      setSuccess(true);
-      setForm(initialState);
-    } catch {
-      setError("Something went wrong. Please try again.");
-    } finally {
-      setLoading(false);
-    }
+  // 🔴 REQUIRED FIELD CHECK (CustomSelect fields)
+  if (
+    !form.tripType ||
+    !form.tripPurpose ||
+    !form.travelMode ||
+    !form.pace
+  ) {
+    setError("Please complete all required fields before submitting.");
+    return;
   }
+
+  setLoading(true);
+
+  try {
+    const res = await fetch("/api/custom-trip", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(form)
+    });
+
+    if (!res.ok) throw new Error();
+
+    setSuccess(true);
+    setForm(initialState);
+  } catch {
+    setError("Something went wrong. Please try again.");
+  } finally {
+    setLoading(false);
+  }
+}
+
 
   return (
     <section className="custom-form-section">
@@ -77,17 +90,19 @@ export default function CustomTripForm() {
 
         <form className="custom-form" onSubmit={handleSubmit}>
           <div className="form-grid">
+            
             <input
               name="name"
-              placeholder="Full Name"
+              placeholder="Full Name *"
               value={form.name}
               onChange={handleChange}
               required
+    
             />
 
             <input
               name="phone"
-              placeholder="Phone Number"
+              placeholder="Phone Number *"
               value={form.phone}
               onChange={handleChange}
               required
@@ -96,7 +111,7 @@ export default function CustomTripForm() {
             <input
               name="email"
               type="email"
-              placeholder="Email Address"
+              placeholder="Email Address *"
               value={form.email}
               onChange={handleChange}
               required
@@ -104,7 +119,7 @@ export default function CustomTripForm() {
 
             <input
               name="departureCity"
-              placeholder="Departure City"
+              placeholder="Departure City *"
               value={form.departureCity}
               onChange={handleChange}
               required
@@ -112,7 +127,7 @@ export default function CustomTripForm() {
 
             <input
               name="destination"
-              placeholder="Destination"
+              placeholder="Destination *"
               value={form.destination}
               onChange={handleChange}
               required
@@ -188,11 +203,12 @@ export default function CustomTripForm() {
             <input
               name="startDate"
               type="date"
+              placeholder="Departure Date"
               value={form.startDate}
               onChange={handleChange}
               required
             />
-
+              
             <input
               name="durationDays"
               type="number"
