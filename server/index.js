@@ -118,9 +118,10 @@ app.post("/api/custom-trip", async (req, res) => {
 });
 
 function requireAdmin(req, res, next) {
-  const token = req.headers["x-admin-pin"];
+  const token = String(req.headers["x-admin-pin"] || "").trim();
+  const adminPin = String(process.env.ADMIN_PIN || "").trim();
 
-  if (!token || token !== ADMIN_TOKEN) {
+  if (!token || token !== adminPin) {
     return res.status(401).json({
       success: false,
       error: "Unauthorized"
@@ -130,14 +131,13 @@ function requireAdmin(req, res, next) {
   next();
 }
 
+
 /* ---------------- ADMIN: VERIFY PIN ---------------- */
 app.post("/api/admin/verify-pin", (req, res) => {
-  const { pin } = req.body || {};
+  const pin = String(req.body?.pin || "").trim();
+  const adminPin = String(process.env.ADMIN_PIN || "").trim();
 
-  console.log("Entered PIN:", pin);
-  console.log("ENV ADMIN_PIN:", process.env.ADMIN_PIN);
-
-  if (pin === process.env.ADMIN_PIN) {
+  if (pin && pin === adminPin) {
     return res.json({ success: true });
   }
 
