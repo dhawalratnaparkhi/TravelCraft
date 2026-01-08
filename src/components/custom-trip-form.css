@@ -1,7 +1,7 @@
-/* =========================================
-   CUSTOM TRIP FORM – STABLE FINAL VERSION
-   No animations. No hacks. Reset-safe.
-   ========================================= */
+/* =================================================
+   CUSTOM TRIP FORM – FINAL STABLE VERSION
+   Works with Vite + base.css + global.css
+   ================================================= */
 
 /* Section */
 .custom-form-section {
@@ -48,9 +48,9 @@
   }
 }
 
-/* =========================================
+/* =================================================
    INPUTS + TEXTAREA
-   ========================================= */
+   ================================================= */
 
 .form-grid input,
 .form-grid select,
@@ -67,9 +67,10 @@
   color: #0f172a;
 
   outline: none;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-/* Focus for inputs & textarea only */
+/* Focus for inputs + textarea */
 .form-grid input:focus,
 .custom-form textarea:focus {
   background: #ffffff;
@@ -84,39 +85,46 @@
   resize: none;
 }
 
-/* =========================================
-   NATIVE SELECT (INTENTIONALLY SIMPLE)
-   ========================================= */
-
-/*
-  We DO NOT remove native appearance.
-  This avoids broken states caused by base.css reset.
-*/
+/* =================================================
+   NATIVE SELECT – POLISHED & SAFE
+   ================================================= */
 
 .form-grid select {
-  appearance: auto;
-  -webkit-appearance: auto;
-  -moz-appearance: auto;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  padding-right: 3rem;
 
   background-color: #f1f5f9;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%2364748b' viewBox='0 0 20 20'%3E%3Cpath d='M5.5 7l4.5 4.5L14.5 7'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1.3rem center;
+  background-size: 1rem;
+
   cursor: pointer;
 }
 
-/* Controlled focus */
-.form-grid select:focus-visible {
-  outline: 2px solid #0f4c81;
-  outline-offset: 2px;
-  background: #ffffff;
-}
-
-/* Hover (subtle) */
+/* Hover */
 .form-grid select:hover {
-  background: #e9eef5;
+  background-color: #e9eef5;
 }
 
-/* =========================================
+/* Focus (no permanent outline) */
+.form-grid select:focus {
+  background: #ffffff;
+  box-shadow: 0 0 0 2px #0f4c81;
+}
+
+/* Dropdown options */
+.form-grid option {
+  font-weight: 500;
+  color: #0f172a;
+}
+
+/* =================================================
    BUTTON
-   ========================================= */
+   ================================================= */
 
 .custom-form button {
   height: 60px;
@@ -128,11 +136,18 @@
   font-size: 1.1rem;
   font-weight: 800;
   cursor: pointer;
+
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-/* =========================================
+.custom-form button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 40px rgba(255, 140, 0, 0.35);
+}
+
+/* =================================================
    MESSAGES
-   ========================================= */
+   ================================================= */
 
 .form-success,
 .form-error {
@@ -148,3 +163,66 @@
 .form-error {
   color: #991b1b;
 }
+
+/* =========================
+   KILL GLOBAL BUTTON FOCUS
+   (ONLY INSIDE CUSTOM FORM)
+   ========================= */
+
+.custom-form button:focus,
+.custom-form button:focus-visible,
+.custom-form button:active {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Re-apply controlled focus ONLY for submit button */
+.custom-form button[type="submit"]:focus-visible {
+  box-shadow: 0 0 0 2px #ff8c00;
+}
+/* =========================================
+   UNIFIED FIELD INTERACTION (ALL BOXES)
+   ========================================= */
+
+/* Inputs, textarea, custom selects */
+.custom-form input,
+.custom-form textarea,
+.custom-select-trigger {
+  transition:
+    background-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.15s ease;
+}
+
+/* Hover effect */
+.custom-form input:hover,
+.custom-form textarea:hover,
+.custom-select-trigger:hover {
+  transform: translateY(-1px);
+}
+
+/* Focus effect (keyboard + click) */
+.custom-form input:focus,
+.custom-form textarea:focus,
+.custom-select-trigger:focus-visible {
+  background: #ffffff;
+  box-shadow: 0 0 0 2px #0f4c81;
+  transform: translateY(0);
+}
+
+/* =========================================
+   DROPDOWN MENU CLEANUP
+   ========================================= */
+
+/* Remove bullets completely */
+.custom-select-menu {
+  list-style: none;
+  margin: 0;
+  padding: 0.4rem;
+}
+
+/* Ensure list items never show bullets */
+.custom-select-menu li {
+  list-style: none;
+}
+

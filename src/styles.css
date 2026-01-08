@@ -1,4 +1,2 @@
-
-/* Global entry CSS – required for Vite */
-@import "./components/custom-trip-form.css";
+@import "/src/components/custom-trip-form.css";
 

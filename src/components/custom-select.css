@@ -1,0 +1,86 @@
+.custom-select {
+  position: relative;
+  width: 100%;
+}
+
+/* Trigger behaves exactly like input */
+.custom-select-trigger {
+  width: 100%;
+  height: 56px;
+  padding: 0 1.4rem;
+  border-radius: 999px;
+
+  background: #f1f5f9;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #0f172a;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  cursor: pointer;
+  user-select: none;
+
+  transition: background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+/* Placeholder */
+.custom-select-trigger.placeholder {
+  color: #64748b;
+}
+
+/* Hover */
+.custom-select-trigger:hover {
+  background: #e9eef5;
+}
+
+/* Focus (keyboard only) */
+.custom-select-trigger:focus-visible {
+  outline: none;
+  background: #ffffff;
+  box-shadow: 0 0 0 2px #0f4c81;
+}
+
+/* Arrow */
+.custom-select-trigger .arrow {
+  font-size: 0.75rem;
+  transition: transform 0.2s ease;
+}
+
+.custom-select-trigger .arrow.open {
+  transform: rotate(180deg);
+}
+
+/* Dropdown */
+.custom-select-menu {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 0;
+  right: 0;
+
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 0.4rem;
+
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+}
+
+/* Options */
+.custom-select-menu li {
+  padding: 0.9rem 1.2rem;
+  border-radius: 14px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.custom-select-menu li:hover {
+  background: #f1f5f9;
+}
+
+.custom-select-menu li.active {
+  background: #0f4c81;
+  color: #ffffff;
+}
