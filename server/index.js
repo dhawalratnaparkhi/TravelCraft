@@ -9,15 +9,35 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
+
+/* ---------------- GLOBAL MIDDLEWARE ---------------- */
 app.use(cors());
 app.use(express.json());
+app.set("etag", false); // ⛔ disable 304 caching
 
 /* ---------------- FRONTEND BUILD ---------------- */
 app.use(express.static(path.join(__dirname, "../dist")));
 
-const ADMIN_TOKEN = process.env.ADMIN_PIN;
+/* ---------------- DISABLE CACHE FOR ADMIN ---------------- */
+app.use("/api/admin", (req, res, next) => {
+  res.setHeader("Cache-Control", "no-store");
+  res.setHeader("Pragma", "no-cache");
+  res.setHeader("Expires", "0");
+  next();
+});
 
-/* ---------------- OPENAI CLIENT ---------------- */
+/* ---------------- ADMIN AUTH ---------------- */
+function requireAdmin(req, res, next) {
+  const token = String(req.headers["x-admin-pin"] || "").trim();
+  const adminPin = String(process.env.ADMIN_PIN || "").trim();
+
+  if (!token || token !== adminPin) {
+    return res.status(401).json({ success: false });
+  }
+  next();
+}
+
+/* ---------------- OPENAI ---------------- */
 const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
 });
@@ -37,258 +57,122 @@ app.post("/api/ai-trip", async (req, res) => {
 
     const prompt = `
 You are an experienced travel consultant.
-
-User preferences:
-- Trip type: ${tripType}
-- Departure city: ${from}
-- Travel mode preference: ${travelMode}
-- Travel style: ${style}
-- Travel pace: ${pace}
-- Trip duration: ${days} days
-- Budget category: ${budget}
-
-Rules:
-- Suggest only realistic destinations
-- If Domestic, suggest Indian destinations only
-- If International, suggest destinations with easy travel and visas
-- Match destination to travel mode and duration
-- Avoid impractical itineraries
-
-Return exactly 3 suggestions in this format:
-1. Destination – short practical reason
+Trip type: ${tripType}
+From: ${from}
+Mode: ${travelMode}
+Style: ${style}
+Pace: ${pace}
+Days: ${days}
+Budget: ${budget}
+Return 3 destinations.
 `;
 
     const response = await client.chat.completions.create({
       model: "gpt-4o-mini",
-      messages: [{ role: "user", content: prompt }],
-      temperature: 0.8
+      messages: [{ role: "user", content: prompt }]
     });
 
-    res.json({
-      result: response.choices[0].message.content
-    });
-  } catch (error) {
-    console.error("AI ERROR:", error);
-    res.status(500).json({ error: "AI generation failed" });
+    res.json({ result: response.choices[0].message.content });
+  } catch {
+    res.status(500).json({ error: "AI failed" });
   }
 });
 
-/* ---------------- FIREBASE TEST ROUTE ---------------- */
-app.get("/api/firebase-test", async (req, res) => {
-  try {
-    const ref = await db.collection("healthcheck").add({
-      ok: true,
-      time: new Date().toISOString()
-    });
-
-    res.json({ success: true, id: ref.id });
-  } catch (err) {
-    console.error("🔥 FIREBASE TEST FAILED:", err);
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-
-/* ---------------- CUSTOM TRIP FORM ---------------- */
+/* ---------------- CUSTOM TRIP ---------------- */
 app.post("/api/custom-trip", async (req, res) => {
-  try {
-    console.log("Incoming inquiry payload:", req.body);
+  const cleanData = Object.fromEntries(
+    Object.entries(req.body).map(([k, v]) => [k, v ?? ""])
+  );
 
-    // 🔒 Firestore-safe sanitization
-    const cleanData = Object.fromEntries(
-      Object.entries(req.body).map(([key, value]) => [
-        key,
-        value === undefined || value === null ? "" : value
-      ])
-    );
+  const ref = await db.collection("inquiries").add({
+    ...cleanData,
+    createdAt: new Date().toISOString()
+  });
 
-    const ref = await db.collection("inquiries").add({
-      ...cleanData,
-      createdAt: new Date().toISOString()
-    });
-
-    console.log("Inquiry saved:", ref.id);
-    res.status(200).json({ success: true, id: ref.id });
-  } catch (err) {
-    console.error("❌ FIRESTORE WRITE FAILED:", err);
-    res.status(500).json({
-      success: false,
-      error: err.message
-    });
-  }
+  res.json({ success: true, id: ref.id });
 });
 
-function requireAdmin(req, res, next) {
-  const token = String(req.headers["x-admin-pin"] || "").trim();
-  const adminPin = String(process.env.ADMIN_PIN || "").trim();
-
-  if (!token || token !== adminPin) {
-    return res.status(401).json({
-      success: false,
-      error: "Unauthorized"
-    });
-  }
-
-  next();
-}
-
-
-/* ---------------- ADMIN: VERIFY PIN ---------------- */
+/* ---------------- ADMIN VERIFY PIN ---------------- */
 app.post("/api/admin/verify-pin", (req, res) => {
   const pin = String(req.body?.pin || "").trim();
+  const adminPin = String(process.env.ADMIN_PIN || "").trim();
 
-  console.log("VERIFY ROUTE HIT");
-  console.log("PIN RECEIVED:", pin);
-
-  if (pin === "4321") {
-    return res.json({ success: true });
-  }
-
-  return res.status(401).json({ success: false });
+  if (pin === adminPin) return res.json({ success: true });
+  res.status(401).json({ success: false });
 });
 
-
-/* ---------------- ADMIN: GET ALL INQUIRIES ---------------- */
+/* ---------------- ADMIN INQUIRIES ---------------- */
 app.get("/api/admin/inquiries", requireAdmin, async (req, res) => {
+  const snap = await db
+    .collection("inquiries")
+    .orderBy("createdAt", "desc")
+    .get();
 
-  try {
-    const snapshot = await db
-      .collection("inquiries")
-      .orderBy("createdAt", "desc")
-      .get();
-
-    const inquiries = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
-
-    res.json({ success: true, inquiries });
-  } catch (err) {
-    console.error("❌ ADMIN FETCH FAILED:", err);
-    res.status(500).json({
-      success: false,
-      error: err.message
-    });
-  }
+  res.json({
+    success: true,
+    inquiries: snap.docs.map(d => ({ id: d.id, ...d.data() }))
+  });
 });
 
-/* ---------------- ADMIN: GET GROUP TOURS ---------------- */
-app.get("/api/admin/inquiries", requireAdmin, async (req, res) => {
+/* ---------------- ADMIN GROUP TOURS ---------------- */
+app.get("/api/admin/group-tours", requireAdmin, async (req, res) => {
+  const snap = await db.collection("groupTours").get();
 
-  try {
-    const snapshot = await db.collection("groupTours").get();
-
-    const tours = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
-
-    res.json({ success: true, tours });
-  } catch (err) {
-    console.error("❌ ADMIN GROUP TOURS FETCH FAILED:", err);
-    res.status(500).json({
-      success: false,
-      error: err.message
-    });
-  }
+  res.json({
+    success: true,
+    tours: snap.docs.map(d => ({ id: d.id, ...d.data() }))
+  });
 });
 
-/* ---------------- ADMIN: TOGGLE GROUP TOUR ---------------- */
-app.get("/api/admin/inquiries", requireAdmin, async (req, res) => {
+/* ---------------- ADMIN TOGGLE TOUR ---------------- */
+app.patch("/api/admin/group-tours/:id/toggle", requireAdmin, async (req, res) => {
+  const ref = db.collection("groupTours").doc(req.params.id);
+  const doc = await ref.get();
 
-  try {
-    const { id } = req.params;
+  if (!doc.exists) return res.status(404).json({ success: false });
 
-    const ref = db.collection("groupTours").doc(id);
-    const doc = await ref.get();
+  const active = doc.data().active === true;
+  await ref.update({ active: !active });
 
-    if (!doc.exists) {
-      return res.status(404).json({ success: false, error: "Tour not found" });
-    }
-
-    const current = doc.data().active === true;
-
-    await ref.update({ active: !current });
-
-    res.json({ success: true, active: !current });
-  } catch (err) {
-    console.error("❌ TOGGLE FAILED:", err);
-    res.status(500).json({
-      success: false,
-      error: err.message
-    });
-  }
+  res.json({ success: true, active: !active });
 });
 
-/* ---------------- GROUP TOURS (PUBLIC) ---------------- */
+/* ---------------- ADMIN CREATE TOUR ---------------- */
+app.post("/api/admin/group-tours", requireAdmin, async (req, res) => {
+  const { name, cat, price, days, img } = req.body || {};
+
+  if (!name || !cat || !price || !days || !img) {
+    return res.status(400).json({ success: false });
+  }
+
+  const ref = await db.collection("groupTours").add({
+    name,
+    cat,
+    price: Number(price),
+    days,
+    img,
+    active: true,
+    createdAt: new Date().toISOString()
+  });
+
+  res.json({ success: true, id: ref.id });
+});
+
+/* ---------------- PUBLIC GROUP TOURS ---------------- */
 app.get("/api/group-tours", async (req, res) => {
-  try {
-    const snapshot = await db.collection("groupTours").get();
+  const snap = await db.collection("groupTours").where("active", "==", true).get();
 
-    const tours = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
-
-    res.json({ success: true, tours });
-  } catch (err) {
-    console.error("❌ GROUP TOURS FETCH FAILED:", err);
-    res.status(500).json({
-      success: false,
-      error: err.message
-    });
-  }
+  res.json({
+    success: true,
+    tours: snap.docs.map(d => ({ id: d.id, ...d.data() }))
+  });
 });
 
-/* ---------------- ADMIN: CREATE GROUP TOUR ---------------- */
-app.get("/api/admin/inquiries", requireAdmin, async (req, res) => {
-
-  try {
-    const {
-      name = "",
-      cat = "",
-      price = 0,
-      days = "",
-      img = "",
-      active = true
-    } = req.body || {};
-
-    if (!name || !cat || !price || !days || !img) {
-      return res.status(400).json({
-        success: false,
-        error: "Missing required fields"
-      });
-    }
-
-    const ref = await db.collection("groupTours").add({
-      name,
-      cat,
-      price: Number(price),
-      days,
-      img,
-      active: Boolean(active),
-      createdAt: new Date().toISOString()
-    });
-
-    res.json({
-      success: true,
-      id: ref.id
-    });
-  } catch (err) {
-    console.error("❌ CREATE TOUR FAILED:", err);
-    res.status(500).json({
-      success: false,
-      error: err.message
-    });
-  }
-});
-
-/* ---------------- SPA FALLBACK (ALWAYS LAST) ---------------- */
+/* ---------------- SPA FALLBACK ---------------- */
 app.use((req, res) => {
   res.sendFile(path.join(__dirname, "../dist/index.html"));
 });
 
-/* ---------------- START SERVER ---------------- */
+/* ---------------- START ---------------- */
 const PORT = process.env.PORT || 8080;
-app.listen(PORT, () => {
-  console.log("Server running on port", PORT);
-});
+app.listen(PORT, () => console.log("Server running on", PORT));
