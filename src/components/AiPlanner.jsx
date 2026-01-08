@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import CustomSelect from "./CustomSelect";
 import "./ai-planner.css";
 
 export default function AiPlanner() {
@@ -18,8 +19,8 @@ export default function AiPlanner() {
     budget: ""
   });
 
-  function updateForm(e) {
-    setForm({ ...form, [e.target.name]: e.target.value });
+  function updateField(name, value) {
+    setForm(prev => ({ ...prev, [name]: value }));
   }
 
   useEffect(() => {
@@ -69,7 +70,6 @@ export default function AiPlanner() {
 
       setResults(parsed);
     } catch (err) {
-      console.error(err);
       alert("AI could not generate results. Please try again.");
     } finally {
       setLoading(false);
@@ -85,49 +85,65 @@ export default function AiPlanner() {
         </p>
 
         <div className="ai-form">
-          <select name="tripType" onChange={updateForm}>
-            <option value="">Trip Type</option>
-            <option value="Domestic">Domestic (India)</option>
-            <option value="International">International</option>
-            <option value="Not Sure">Not sure</option>
-          </select>
+          <CustomSelect
+            placeholder="Trip Type"
+            value={form.tripType}
+            onChange={value => updateField("tripType", value)}
+            options={[
+              { value: "Domestic", label: "Domestic (India)" },
+              { value: "International", label: "International" },
+              { value: "Not Sure", label: "Not sure" }
+            ]}
+          />
 
-          <select name="travelMode" onChange={updateForm}>
-            <option value="">Preferred Travel Mode</option>
-            <option value="Flight">Flight</option>
-            <option value="Train">Train</option>
-            <option value="Road">Road Trip</option>
-            <option value="Doesn't matter">Doesn't matter</option>
-          </select>
+          <CustomSelect
+            placeholder="Preferred Travel Mode"
+            value={form.travelMode}
+            onChange={value => updateField("travelMode", value)}
+            options={[
+              { value: "Flight", label: "Flight" },
+              { value: "Train", label: "Train" },
+              { value: "Road", label: "Road Trip" },
+              { value: "Doesn't matter", label: "Doesn't matter" }
+            ]}
+          />
 
-          <select name="style" onChange={updateForm}>
-            <option value="">Travel Style</option>
-            <option value="Luxury">Luxury</option>
-            <option value="Relaxed">Relaxed</option>
-            <option value="Adventure">Adventure</option>
-            <option value="Honeymoon">Honeymoon</option>
-            <option value="Family">Family</option>
-          </select>
+          <CustomSelect
+            placeholder="Travel Style"
+            value={form.style}
+            onChange={value => updateField("style", value)}
+            options={[
+              { value: "Luxury", label: "Luxury" },
+              { value: "Relaxed", label: "Relaxed" },
+              { value: "Adventure", label: "Adventure" },
+              { value: "Honeymoon", label: "Honeymoon" },
+              { value: "Family", label: "Family" }
+            ]}
+          />
 
-          <select name="pace" onChange={updateForm}>
-            <option value="">Travel Pace</option>
-            <option value="Slow & Relaxed">Slow & Relaxed</option>
-            <option value="Balanced">Balanced</option>
-            <option value="Fast">Fast & Packed</option>
-          </select>
+          <CustomSelect
+            placeholder="Travel Pace"
+            value={form.pace}
+            onChange={value => updateField("pace", value)}
+            options={[
+              { value: "Slow & Relaxed", label: "Slow & Relaxed" },
+              { value: "Balanced", label: "Balanced" },
+              { value: "Fast", label: "Fast & Packed" }
+            ]}
+          />
 
           <input
             type="number"
-            name="days"
             placeholder="Number of days"
-            onChange={updateForm}
+            value={form.days}
+            onChange={e => updateField("days", e.target.value)}
           />
 
           <input
             type="text"
-            name="from"
             placeholder="Departure city"
-            onChange={updateForm}
+            value={form.from}
+            onChange={e => updateField("from", e.target.value)}
           />
 
           <button className="ai-btn" onClick={generate}>
@@ -149,30 +165,24 @@ export default function AiPlanner() {
                   </div>
 
                   <button
-  className="ai-use-btn"
-  onClick={() =>
-    navigate("/custom", {
-      state: {
-        // Core
-        destination: item.title,
-        notes: `AI Suggested Plan:\n${item.reason}`,
-
-        // AI form context
-        tripType: form.tripType,
-        travelMode: form.travelMode,
-        pace: form.pace,
-        durationDays: form.days,
-        departureCity: form.from,
-
-        // Best guess mappings
-        tripPurpose: form.style || "",
-      }
-    })
-  }
->
-  Use this plan
-</button>
-
+                    className="ai-use-btn"
+                    onClick={() =>
+                      navigate("/custom", {
+                        state: {
+                          destination: item.title,
+                          notes: `AI Suggested Plan:\n${item.reason}`,
+                          tripType: form.tripType,
+                          travelMode: form.travelMode,
+                          pace: form.pace,
+                          durationDays: form.days,
+                          departureCity: form.from,
+                          tripPurpose: form.style
+                        }
+                      })
+                    }
+                  >
+                    Use this plan
+                  </button>
                 </div>
               </div>
             ))}
