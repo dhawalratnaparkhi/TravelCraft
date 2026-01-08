@@ -3,6 +3,7 @@ import "./admin-dashboard.css";
 
 export default function AdminDashboard() {
   const [inquiries, setInquiries] = useState([]);
+  const [selected, setSelected] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -46,7 +47,12 @@ export default function AdminDashboard() {
           </div>
 
           {inquiries.map((item) => (
-            <div key={item.id} className="admin-row">
+            <div
+              key={item.id}
+              className="admin-row"
+              onClick={() => setSelected(item)}
+              style={{ cursor: "pointer" }}
+            >
               <div className="admin-cell">{item.name || "-"}</div>
               <div className="admin-cell">{item.email || "-"}</div>
               <div className="admin-cell">{item.phone || "-"}</div>
@@ -56,6 +62,25 @@ export default function AdminDashboard() {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {selected && (
+        <div className="admin-detail">
+          <h2>Inquiry Details</h2>
+
+          <div className="detail-grid">
+            {Object.entries(selected).map(([key, value]) => (
+              <div key={key} className="detail-row">
+                <strong>{key}</strong>
+                <span>{formatValue(value)}</span>
+              </div>
+            ))}
+          </div>
+
+          <button className="detail-close" onClick={() => setSelected(null)}>
+            Close
+          </button>
         </div>
       )}
     </div>
@@ -76,4 +101,10 @@ function formatDate(value) {
   }
 
   return "-";
+}
+
+function formatValue(value) {
+  if (value === null || value === undefined) return "-";
+  if (typeof value === "object") return JSON.stringify(value, null, 2);
+  return String(value);
 }

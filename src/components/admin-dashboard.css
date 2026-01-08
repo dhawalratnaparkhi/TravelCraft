@@ -42,3 +42,40 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+.admin-detail {
+  margin-top: 32px;
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 12px 24px;
+  margin-top: 16px;
+  font-size: 14px;
+}
+
+.detail-row {
+  display: contents;
+}
+
+.detail-row strong {
+  color: #555;
+}
+
+.detail-row span {
+  white-space: pre-wrap;
+}
+
+.detail-close {
+  margin-top: 24px;
+  padding: 10px 16px;
+  background: #111;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
