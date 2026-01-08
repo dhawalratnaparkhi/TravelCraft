@@ -23,9 +23,10 @@ export default function AdminDashboard() {
 
   /* ---------- VERIFY PIN ---------- */
   const verifyPin = async () => {
-    setAuthError("");
-    setLoading(true);
+  setAuthError("");
+  setLoading(true);
 
+  try {
     const res = await fetch("/api/admin/verify-pin", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -33,18 +34,23 @@ export default function AdminDashboard() {
     });
 
     if (!res.ok) {
-      setAuthError("Invalid PIN");
-      setLoading(false);
-      return;
+      throw new Error("Invalid PIN");
     }
 
     await loadData(pin);
     setAuthenticated(true);
+  } catch (err) {
+    setAuthError("Invalid PIN");
+    setAuthenticated(false);
+  } finally {
     setLoading(false);
-  };
+  }
+};
+
 
   /* ---------- LOAD DATA ---------- */
-  const loadData = async (adminPin) => {
+ const loadData = async (adminPin) => {
+  try {
     const [inqRes, tourRes] = await Promise.all([
       fetch("/api/admin/inquiries", {
         headers: { "x-admin-pin": adminPin }
@@ -55,9 +61,17 @@ export default function AdminDashboard() {
       }).then(r => r.json())
     ]);
 
+    if (!inqRes.success || !tourRes.success) {
+      throw new Error("Unauthorized");
+    }
+
     setInquiries(inqRes.inquiries || []);
     setTours(tourRes.tours || []);
-  };
+  } catch (err) {
+    throw err;
+  }
+};
+
 
   /* ---------- ACTIONS ---------- */
   const toggleTour = async (id) => {
