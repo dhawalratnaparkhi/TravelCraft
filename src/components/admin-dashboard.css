@@ -79,3 +79,29 @@
   border-radius: 6px;
   cursor: pointer;
 }
+.admin-section {
+  margin-bottom: 48px;
+}
+
+.admin-section h2 {
+  margin-bottom: 16px;
+}
+
+.btn-on,
+.btn-off {
+  padding: 6px 12px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.btn-on {
+  background: #2ecc71;
+  color: #fff;
+}
+
+.btn-off {
+  background: #e74c3c;
+  color: #fff;
+}

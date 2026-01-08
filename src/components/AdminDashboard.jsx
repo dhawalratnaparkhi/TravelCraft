@@ -3,40 +3,83 @@ import "./admin-dashboard.css";
 
 export default function AdminDashboard() {
   const [inquiries, setInquiries] = useState([]);
+  const [tours, setTours] = useState([]);
   const [selected, setSelected] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    fetch("/api/admin/inquiries")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success) {
-          setInquiries(data.inquiries);
-        } else {
-          setError("Failed to load inquiries");
-        }
+    Promise.all([
+      fetch("/api/admin/inquiries").then(res => res.json()),
+      fetch("/api/admin/group-tours").then(res => res.json())
+    ])
+      .then(([inqRes, tourRes]) => {
+        if (inqRes.success) setInquiries(inqRes.inquiries);
+        if (tourRes.success) setTours(tourRes.tours);
       })
       .catch(() => {
-        setError("Server error");
+        setError("Failed to load admin data");
       })
-      .finally(() => {
-        setLoading(false);
-      });
+      .finally(() => setLoading(false));
   }, []);
+
+  const toggleTour = async (id) => {
+    await fetch(`/api/admin/group-tours/${id}/toggle`, {
+      method: "PATCH"
+    });
+
+    setTours(prev =>
+      prev.map(t =>
+        t.id === id ? { ...t, active: !t.active } : t
+      )
+    );
+  };
 
   return (
     <div className="admin-page">
-      <h1 className="admin-title">Admin · Inquiries</h1>
+      <h1 className="admin-title">Admin Dashboard</h1>
 
-      {loading && <p>Loading inquiries...</p>}
+      {loading && <p>Loading...</p>}
       {error && <p className="admin-error">{error}</p>}
 
-      {!loading && !error && inquiries.length === 0 && (
-        <p>No inquiries found.</p>
-      )}
+      {/* GROUP TOURS */}
+      <section className="admin-section">
+        <h2>Group Tours</h2>
 
-      {!loading && inquiries.length > 0 && (
+        <div className="admin-table">
+          <div className="admin-row header">
+            <div>Name</div>
+            <div>Category</div>
+            <div>Price</div>
+            <div>Status</div>
+            <div>Action</div>
+          </div>
+
+          {tours.map(tour => (
+            <div key={tour.id} className="admin-row">
+              <div className="admin-cell">{tour.name}</div>
+              <div className="admin-cell">{tour.cat}</div>
+              <div className="admin-cell">${tour.price}</div>
+              <div className="admin-cell">
+                {tour.active ? "Active" : "Inactive"}
+              </div>
+              <div className="admin-cell">
+                <button
+                  onClick={() => toggleTour(tour.id)}
+                  className={tour.active ? "btn-off" : "btn-on"}
+                >
+                  {tour.active ? "Disable" : "Enable"}
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* INQUIRIES */}
+      <section className="admin-section">
+        <h2>Inquiries</h2>
+
         <div className="admin-table">
           <div className="admin-row header">
             <div>Name</div>
@@ -46,7 +89,7 @@ export default function AdminDashboard() {
             <div>Start Date</div>
           </div>
 
-          {inquiries.map((item) => (
+          {inquiries.map(item => (
             <div
               key={item.id}
               className="admin-row"
@@ -63,7 +106,7 @@ export default function AdminDashboard() {
             </div>
           ))}
         </div>
-      )}
+      </section>
 
       {selected && (
         <div className="admin-detail">
