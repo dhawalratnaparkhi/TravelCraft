@@ -134,12 +134,16 @@ function requireAdmin(req, res, next) {
 app.post("/api/admin/verify-pin", (req, res) => {
   const { pin } = req.body || {};
 
-  if (pin && pin === process.env.ADMIN_PIN) {
+  console.log("Entered PIN:", pin);
+  console.log("ENV ADMIN_PIN:", process.env.ADMIN_PIN);
+
+  if (pin === process.env.ADMIN_PIN) {
     return res.json({ success: true });
   }
 
   res.status(401).json({ success: false });
 });
+
 
 /* ---------------- ADMIN: GET ALL INQUIRIES ---------------- */
 app.get("/api/admin/inquiries", requireAdmin, async (req, res) => {
