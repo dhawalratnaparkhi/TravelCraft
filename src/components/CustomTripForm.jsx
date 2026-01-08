@@ -48,9 +48,27 @@ export default function CustomTripForm() {
 
   async function handleSubmit(e) {
   e.preventDefault();
-  console.log("SUBMIT CLICKED", form);
-  alert("Submit clicked – check console");
+  console.log("Sending payload:", form);
+
+  try {
+    const res = await fetch("/api/custom-trip", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(form)
+    });
+
+    console.log("HTTP STATUS:", res.status);
+
+    const data = await res.json();
+    console.log("API RESPONSE:", data);
+
+    alert("Request completed. Check console.");
+  } catch (err) {
+    console.error("FETCH ERROR:", err);
+    alert("Fetch failed. Check console.");
+  }
 }
+
 
 
 
